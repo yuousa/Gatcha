@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RETRO ARCADE WORLD</title>
+    <style>
+        /* 기본 스타일 초기화 및 폰트 설정 */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #050510;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* CRT 모니터 느낌의 스캔라인 효과 */
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+        }
+
+        /* 사이버펑크/레트로 네온 배경 흐림 효과 */
+        .neon-bg {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 0, 128, 0.2);
+            border-radius: 50%;
+            filter: blur(150px);
+            top: 20%;
+            left: 25%;
+            animation: float 6s ease-in-out infinite alternate;
+        }
+        .neon-bg2 {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 191, 255, 0.2);
+            border-radius: 50%;
+            filter: blur(150px);
+            bottom: 20%;
+            right: 25%;
+            animation: float 6s ease-in-out infinite alternate-reverse;
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        /* 게임 타이틀 */
+        .title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f, 0 0 40px #ff007f;
+            animation: pulse 1.5s infinite alternate;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #00ffff;
+            text-shadow: 0 0 8px #00ffff;
+            margin-bottom: 80px;
+        }
+
+        /* 시작 버튼 */
+        .start-btn {
+            background: transparent;
+            border: 4px solid #00ffff;
+            color: #00ffff;
+            padding: 20px 40px;
+            font-family: 'Press Start 2P', sans-serif;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            transition: all 0.1s ease;
+            animation: blink 1s infinite;
+        }
+
+        .start-btn:hover {
+            background-color: #00ffff;
+            color: #050510;
+            box-shadow: 0 0 30px #00ffff;
+            animation: none;
+        }
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 메뉴 화면 (처음엔 숨김) */
+        .menu-screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .menu-list {
+            list-style: none;
+            margin-top: 30px;
+        }
+
+        .menu-item {
+            font-size: 1.2rem;
+            margin: 25px 0;
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            color: #ff007f;
+            text-shadow: 0 0 10px #ff007f;
+        }
+
+        .menu-item:hover::before {
+            content: '▶';
+            position: absolute;
+            left: -40px;
+            color: #ff007f;
+            animation: blink 0.5s infinite;
+        }
+
+        /* 애니메이션 효과들 */
+        @keyframes pulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
+            100% { transform: scale(1.05); text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f, 0 0 60px #ff007f; }
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(30px); }
+        }
+
+        /* 코인 표시 */
+        .insert-coin {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="neon-bg"></div>
+    <div class="neon-bg2"></div>
+
+    <div class="container">
+        <!-- 타이틀 화면 -->
+        <div id="title-screen">
+            <h1 class="title">CYBER QUEST</h1>
+            <p class="subtitle">INSERT COIN TO PLAY</p>
+            
+            <button class="start-btn" id="start-trigger">PRESS START</button>
+            
+            <p class="insert-coin">CREDITS: 99</p>
+        </div>
+
+        <!-- 진입 후 메뉴 화면 -->
+        <div id="menu-screen" class="menu-screen">
+            <h2 class="title" style="font-size: 2rem;">MAIN MENU</h2>
+            <ul class="menu-list">
+                <li class="menu-item" onclick="selectMenu('START GAME')">START GAME</li>
+                <li class="menu-item" onclick="selectMenu('LOAD GAME')">LOAD GAME</li>
+                <li class="menu-item" onclick="selectMenu('OPTIONS')">OPTIONS</li>
+                <li class="menu-item" onclick="selectMenu('EXIT')">EXIT</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const startTrigger = document.getElementById('start-trigger');
+        const titleScreen = document.getElementById('title-screen');
+        const menuScreen = document.getElementById('menu-screen');
+
+        // 브라우저 제한 우회를 위한 단순 웹 오디오 비프음 기능 (레트로 사운드)
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'start') {
+                // 게임 시작시 짜릿한 상승 비프음
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } else if (type === 'select') {
+                // 메뉴 이동/선택시 픽셀음
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+            }
+        }
+
+        // PRESS START 클릭 시
+        startTrigger.addEventListener('click', () => {
+            playSound('start');
+            
+            // 타이틀 화면 페이드 아웃 후 메뉴 화면 등장
+            titleScreen.style.display = 'none';
+            menuScreen.style.display = 'block';
+            setTimeout(() => {
+                menuScreen.style.opacity = 1;
+            }, 50);
+        });
+
+        // 메뉴 아이템 마우스 오버 시 소리 효과 추가
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('mouseenter', () => playSound('select'));
+        });
+
+        // 메뉴 선택 시 기능 (여기에 원하는 페이지 이동 링크를 넣으시면 됩니다)
+        function selectMenu(menuName) {
+            playSound('start');
+            alert(`${menuName} 기능을 실행합니다! (여기에 링크나 전환 효과를 연결하세요)`);
+        }
+    </script>
+</body>
+</html>
