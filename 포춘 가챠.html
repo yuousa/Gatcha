@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 운세</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a1628;
+    --bg-mid: #0f2244;
+    --bg-light: #1a3a6e;
+    --accent-cyan: #4dd9ff;
+    --accent-gold: #ffd700;
+    --accent-pink: #ff6eb4;
+    --accent-green: #39ff8f;
+    --accent-purple: #b36eff;
+    --text-main: #e8f4ff;
+    --text-dim: #7aa8cc;
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(77,217,255,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Press Start 2P', monospace;
+    background: var(--bg-deep);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── STAR CANVAS ── */
+  #stars-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── NEBULA GLOW ── */
+  .nebula {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .nebula-1 { width: 600px; height: 400px; background: radial-gradient(circle, #3a6fd8, transparent); top: -100px; left: -150px; }
+  .nebula-2 { width: 500px; height: 500px; background: radial-gradient(circle, #6b2fa0, transparent); bottom: -80px; right: -100px; }
+  .nebula-3 { width: 350px; height: 350px; background: radial-gradient(circle, #1a7a9e, transparent); top: 40%; left: 50%; }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .screen.hidden {
+    display: none;
+  }
+
+  /* ── TITLE ── */
+  .page-title {
+    font-size: clamp(22px, 4vw, 38px);
+    color: var(--accent-cyan);
+    text-shadow:
+      0 0 10px var(--accent-cyan),
+      0 0 30px rgba(77,217,255,0.5),
+      0 0 60px rgba(77,217,255,0.2);
+    letter-spacing: 4px;
+    text-align: center;
+    margin-bottom: 8px;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+  @keyframes titlePulse {
+    0%,100% { text-shadow: 0 0 10px var(--accent-cyan), 0 0 30px rgba(77,217,255,0.5); }
+    50% { text-shadow: 0 0 20px var(--accent-cyan), 0 0 60px rgba(77,217,255,0.8), 0 0 100px rgba(77,217,255,0.3); }
+  }
+
+  .page-subtitle {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 50px;
+    text-align: center;
+  }
+
+  /* ── GACHA MACHINE ── */
+  .gacha-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .gacha-machine {
+    width: 260px;
+    height: 320px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 0 20px rgba(77,217,255,0.3));
+  }
+  .gacha-machine:hover { transform: scale(1.03); }
+  .gacha-machine:active { transform: scale(0.97); }
+
+  .gacha-machine svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── CAPSULE INSIDE MACHINE ── */
+  .capsule-display {
+    animation: floatCapsule 2.5s ease-in-out infinite;
+  }
+  @keyframes floatCapsule {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* ── TURN HANDLE ANIMATION ── */
+  .handle-group {
+    transform-origin: 198px 220px;
+    transition: transform 0.1s;
+  }
+  .handle-spinning {
+    animation: spinHandle 0.5s ease-in-out;
+  }
+  @keyframes spinHandle {
+    0% { transform: rotate(0deg); }
+    40% { transform: rotate(120deg); }
+    70% { transform: rotate(100deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* ── BUTTON ── */
+  .gacha-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, #1a3a6e, #0f2244);
+    border: 2px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    cursor: pointer;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: 0 0 15px rgba(77,217,255,0.3), inset 0 0 15px rgba(77,217,255,0.05);
+    text-transform: uppercase;
+  }
+  .gacha-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(77,217,255,0.1));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .gacha-btn:hover { box-shadow: 0 0 30px rgba(77,217,255,0.6), inset 0 0 20px rgba(77,217,255,0.1); transform: translateY(-2px); }
+  .gacha-btn:hover::before { opacity: 1; }
+  .gacha-btn:active { transform: translateY(1px); }
+  .gacha-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .disclaimer {
+    font-size: 16px;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 1px;
+    margin-top: 40px;
+    opacity: 0.7;
+    line-height: 1.8;
+  }
+
+  /* ── RESULT SCREEN ── */
+  #result-screen {
+    gap: 30px;
+  }
+
+  .result-card {
+    max-width: 500px;
+    width: 100%;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 36px 30px;
+    position: relative;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    animation: cardReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes cardReveal {
+    from { opacity: 0; transform: scale(0.6) translateY(30px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .result-card::before, .result-card::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: var(--accent-cyan);
+    border-style: solid;
+  }
+  .result-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .result-card::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  .grade-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 6px 14px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .grade-SSR { color: #ffd700; border: 1px solid #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.5); text-shadow: 0 0 10px #ffd700; }
+  .grade-SR  { color: #ff6eb4; border: 1px solid #ff6eb4; box-shadow: 0 0 20px rgba(255,110,180,0.5); text-shadow: 0 0 10px #ff6eb4; }
+  .grade-R   { color: #b36eff; border: 1px solid #b36eff; box-shadow: 0 0 20px rgba(179,110,255,0.5); text-shadow: 0 0 10px #b36eff; }
+  .grade-N   { color: #4dd9ff; border: 1px solid #4dd9ff; box-shadow: 0 0 15px rgba(77,217,255,0.4); }
+  .grade-UC  { color: #39ff8f; border: 1px solid #39ff8f; box-shadow: 0 0 15px rgba(57,255,143,0.4); text-shadow: 0 0 10px #39ff8f; }
+
+  .capsule-emoji {
+    font-size: 64px;
+    display: block;
+    margin: 10px 0 20px;
+    animation: bounceIn 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .fortune-title {
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.8;
+    animation: fadeUp 0.5s 0.5s both;
+  }
+  .fortune-text {
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 2.2;
+    animation: fadeUp 0.5s 0.7s both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .lucky-items {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    animation: fadeUp 0.5s 0.9s both;
+  }
+  .lucky-tag {
+    font-size: 8px;
+    padding: 5px 10px;
+    background: rgba(77,217,255,0.08);
+    border: 1px solid rgba(77,217,255,0.2);
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .back-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 12px 24px;
+    background: transparent;
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+  /* ── PARTICLES ── */
+  .particle-burst {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── SCANLINES overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── GRADE GLOW RING ── */
+  .grade-SSR .capsule-emoji { filter: drop-shadow(0 0 20px gold); }
+  .grade-SR  .capsule-emoji { filter: drop-shadow(0 0 20px #ff6eb4); }
+  .grade-R   .capsule-emoji { filter: drop-shadow(0 0 18px #b36eff); }
+
+  /* ── PIXEL CORNERS on machine ── */
+  .machine-frame {
+    image-rendering: pixelated;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- ══════════ MAIN SCREEN ══════════ -->
+<div class="screen" id="main-screen">
+  <h1 class="page-title">✦ 오늘의 운세 ✦</h1>
+  <p class="page-subtitle">DAILY FORTUNE GACHA</p>
+
+  <div class="gacha-wrapper">
+    <!-- SVG Gacha Machine -->
+    <div class="gacha-machine" id="gacha-machine" title="클릭하여 운세 뽑기">
+      <svg viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sphereGrad" cx="40%" cy="35%">
+            <stop offset="0%" stop-color="#2a6aad"/>
+            <stop offset="50%" stop-color="#1a3a6e"/>
+            <stop offset="100%" stop-color="#0a1628"/>
+          </radialGradient>
+          <radialGradient id="capsuleTop" cx="40%" cy="30%">
+            <stop offset="0%" stop-color="#a0e0ff"/>
+            <stop offset="100%" stop-color="#4dd9ff"/>
+          </radialGradient>
+          <radialGradient id="capsuleBot" cx="40%" cy="30%">
+            <stop offset="0%" stop-color="#ffb0d0"/>
+            <stop offset="100%" stop-color="#ff6eb4"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="softglow">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1e3a70"/>
+            <stop offset="100%" stop-color="#0d2050"/>
+          </linearGradient>
+          <linearGradient id="legGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a3060"/>
+            <stop offset="100%" stop-color="#0a1830"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Base / Legs -->
+        <rect x="60" y="260" width="140" height="16" rx="3" fill="url(#legGrad)" stroke="#2a4a8e" stroke-width="1.5"/>
+        <rect x="75" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70" stroke-width="1"/>
+        <rect x="165" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70" stroke-width="1"/>
+        <rect x="68" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060" stroke-width="1"/>
+        <rect x="156" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060" stroke-width="1"/>
+
+        <!-- Body Box -->
+        <rect x="45" y="175" width="170" height="88" rx="6" fill="url(#bodyGrad)" stroke="#2a5aaa" stroke-width="2"/>
+        <!-- Body pixel details -->
+        <rect x="56" y="185" width="60" height="4" rx="1" fill="#4dd9ff" opacity="0.2"/>
+        <rect x="56" y="193" width="40" height="3" rx="1" fill="#4dd9ff" opacity="0.15"/>
+        <!-- Coin slot -->
+        <rect x="155" y="210" width="40" height="12" rx="3" fill="#0a1628" stroke="#4dd9ff" stroke-width="1.5"/>
+        <rect x="172" y="213" width="6" height="6" rx="1" fill="#4dd9ff" opacity="0.5"/>
+        <!-- Dispense hole -->
+        <rect x="65" y="225" width="70" height="22" rx="4" fill="#060e20" stroke="#4dd9ff" stroke-width="1.5"/>
+        <rect x="70" y="228" width="60" height="3" rx="1" fill="#4dd9ff" opacity="0.1"/>
+        <!-- Stars label -->
+        <text x="130" y="204" text-anchor="middle" font-family="monospace" font-size="8" fill="#4dd9ff" opacity="0.6" font-weight="bold">★ FORTUNE ★</text>
+
+        <!-- Globe sphere -->
+        <circle cx="130" cy="112" r="95" fill="#050e22" stroke="#1a3a6e" stroke-width="2"/>
+        <circle cx="130" cy="112" r="90" fill="url(#sphereGrad)" filter="url(#softglow)"/>
+        <!-- Globe shine -->
+        <ellipse cx="108" cy="85" rx="22" ry="14" fill="white" opacity="0.06" transform="rotate(-20,108,85)"/>
+        <ellipse cx="115" cy="80" rx="8" ry="5" fill="white" opacity="0.1" transform="rotate(-20,115,80)"/>
+        <!-- Globe border ring -->
+        <circle cx="130" cy="112" r="90" fill="none" stroke="#4dd9ff" stroke-width="1.5" opacity="0.4"/>
+        <circle cx="130" cy="112" r="93" fill="none" stroke="#4dd9ff" stroke-width="0.5" opacity="0.15"/>
+
+        <!-- Stars inside globe -->
+        <circle cx="95" cy="88" r="1.5" fill="#4dd9ff" opacity="0.7"/>
+        <circle cx="152" cy="95" r="1" fill="#ffd700" opacity="0.8"/>
+        <circle cx="110" cy="135" r="1" fill="#ffffff" opacity="0.5"/>
+        <circle cx="160" cy="125" r="1.5" fill="#4dd9ff" opacity="0.6"/>
+        <circle cx="100" cy="115" r="1" fill="#ff6eb4" opacity="0.6"/>
+        <circle cx="140" cy="80" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="165" cy="108" r="1.2" fill="#b36eff" opacity="0.6"/>
+
+        <!-- Floating capsule inside globe -->
+        <g class="capsule-display">
+          <ellipse cx="130" cy="109" rx="22" ry="22" fill="none" stroke="#4dd9ff" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.3"/>
+          <!-- Top half -->
+          <path d="M108,109 Q108,87 130,87 Q152,87 152,109 Z" fill="url(#capsuleTop)" opacity="0.9"/>
+          <!-- Bottom half -->
+          <path d="M108,109 Q108,131 130,131 Q152,131 152,109 Z" fill="url(#capsuleBot)" opacity="0.9"/>
+          <!-- Seam -->
+          <line x1="108" y1="109" x2="152" y2="109" stroke="white" stroke-width="1.5" opacity="0.5"/>
+          <!-- Capsule shine -->
+          <ellipse cx="122" cy="97" rx="5" ry="7" fill="white" opacity="0.25" transform="rotate(-20,122,97)"/>
+        </g>
+
+        <!-- Handle group -->
+        <g class="handle-group" id="handle-group">
+          <circle cx="198" cy="220" r="14" fill="#0d2050" stroke="#4dd9ff" stroke-width="2"/>
+          <circle cx="198" cy="220" r="8" fill="#1a3a6e" stroke="#4dd9ff" stroke-width="1"/>
+          <line x1="198" y1="206" x2="198" y2="195" stroke="#4dd9ff" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="198" cy="192" r="6" fill="#4dd9ff" filter="url(#glow)"/>
+          <circle cx="198" cy="192" r="3" fill="#a0e8ff"/>
+        </g>
+
+        <!-- Top cap pixel decoration -->
+        <rect x="115" y="18" width="30" height="8" rx="2" fill="#0d2050" stroke="#4dd9ff" stroke-width="1.5"/>
+        <rect x="120" y="14" width="20" height="6" rx="2" fill="#1a3a6e" stroke="#4dd9ff" stroke-width="1"/>
+        <rect x="126" y="10" width="8" height="6" rx="1" fill="#4dd9ff" opacity="0.8" filter="url(#glow)"/>
+
+        <!-- Pixel corner decorations on body -->
+        <rect x="45" y="175" width="8" height="8" fill="#4dd9ff" opacity="0.3"/>
+        <rect x="207" y="175" width="8" height="8" fill="#4dd9ff" opacity="0.3"/>
+        <rect x="45" y="255" width="8" height="8" fill="#4dd9ff" opacity="0.3"/>
+        <rect x="207" y="255" width="8" height="8" fill="#4dd9ff" opacity="0.3"/>
+      </svg>
+    </div>
+
+    <button class="gacha-btn" id="main-draw-btn" onclick="startGacha()">
+      ▶ 운세 뽑기
+    </button>
+  </div>
+
+  <p class="disclaimer">재미로만 즐겨 주십시오.</p>
+</div>
+
+<!-- ══════════ RESULT SCREEN ══════════ -->
+<div class="screen hidden" id="result-screen">
+  <h1 class="page-title" style="font-size:clamp(16px,3vw,28px); margin-bottom:6px;">✦ 오늘의 운세 ✦</h1>
+  <p class="page-subtitle" style="margin-bottom:28px;">TODAY'S FORTUNE</p>
+
+  <div class="result-card" id="result-card">
+    <!-- filled by JS -->
+  </div>
+
+  <button class="back-btn" onclick="goBack()">← 다시 뽑기</button>
+  <p class="disclaimer" style="margin-top:20px;">재미로만 즐겨 주십시오.</p>
+</div>
+
+<script>
+// ── STARS ──────────────────────────────────────────────
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.3,
+      alpha: Math.random(),
+      speed: Math.random() * 0.3 + 0.05,
+      twinkle: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const t = Date.now() * 0.001;
+  stars.forEach(s => {
+    const a = 0.4 + 0.6 * Math.abs(Math.sin(t * s.speed + s.twinkle));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,230,255,${a * s.alpha})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+
+window.addEventListener('resize', initStars);
+initStars();
+animateStars();
+
+// ── FORTUNE DATA ────────────────────────────────────────
+const grades = [
+  {
+    id: 'SSR', label: '★★★ SSR ★★★',
+    emoji: '🌟',
+    color: 'grade-SSR',
+    titles: ['천상의 기운이 함께합니다', '오늘은 최고의 날입니다', '우주가 당신을 축복합니다'],
+    texts: [
+      '모든 일이 순조롭게 풀리는 하루입니다. 오랫동안 기다려온 소식이 들려올 것입니다. 자신을 믿고 앞으로 나아가세요.',
+      '강력한 행운의 기운이 당신을 감싸고 있습니다. 포기하지 않았던 일에서 빛나는 결실을 맺게 됩니다.',
+    ],
+    lucky: [['방향: 북쪽', '색상: 금색', '숫자: 7', '아이템: 별사탕'],
+             ['방향: 동쪽', '색상: 흰색', '숫자: 1', '아이템: 크리스탈']],
+    chance: 5
+  },
+  {
+    id: 'SR', label: '★★ SR ★★',
+    emoji: '💫',
+    color: 'grade-SR',
+    titles: ['행운의 별이 빛납니다', '좋은 기회가 찾아옵니다', '분홍빛 행운이 가득합니다'],
+    texts: [
+      '인간관계에서 좋은 인연이 찾아올 것입니다. 평소보다 조금 더 용기를 내어보세요.',
+      '기분 좋은 소식과 함께 하루가 시작됩니다. 소중한 사람과 따뜻한 시간을 보내세요.',
+    ],
+    lucky: [['방향: 서쪽', '색상: 분홍', '숫자: 3', '아이템: 장미'],
+             ['방향: 남쪽', '색상: 빨강', '숫자: 5', '아이템: 하트']],
+    chance: 15
+  },
+  {
+    id: 'R', label: '★ R ★',
+    emoji: '🔮',
+    color: 'grade-R',
+    titles: ['신비로운 기운이 흐릅니다', '변화의 바람이 붑니다', '내면의 힘을 깨우세요'],
+    texts: [
+      '새로운 관점으로 사물을 바라보면 뜻밖의 해답을 찾게 됩니다. 직감을 믿어보세요.',
+      '작은 변화가 큰 전환점이 됩니다. 지금까지의 노력이 서서히 빛을 발하기 시작합니다.',
+    ],
+    lucky: [['방향: 북서', '색상: 보라', '숫자: 9', '아이템: 수정'],
+             ['방향: 남서', '색상: 남색', '숫자: 6', '아이템: 달빛']],
+    chance: 25
+  },
+  {
+    id: 'UC', label: '◆ UC ◆',
+    emoji: '🌿',
+    color: 'grade-UC',
+    titles: ['차분한 기운이 감돕니다', '성실함이 빛을 발합니다', '꾸준함이 답입니다'],
+    texts: [
+      '오늘은 무리하기보다 자신을 돌보는 하루를 만들어보세요. 작은 친절이 돌아옵니다.',
+      '평범한 일상 속에 숨은 행복을 발견하게 됩니다. 감사한 마음을 가져보세요.',
+    ],
+    lucky: [['방향: 동북', '색상: 초록', '숫자: 4', '아이템: 네잎클로버'],
+             ['방향: 동남', '색상: 하늘', '숫자: 2', '아이템: 이슬']],
+    chance: 25
+  },
+  {
+    id: 'N', label: '◇ N ◇',
+    emoji: '🌊',
+    color: 'grade-N',
+    titles: ['평온한 하루가 기다립니다', '잔잔한 물결 같은 하루', '여유로운 기운이 함께합니다'],
+    texts: [
+      '급하게 서두르지 않아도 됩니다. 오늘은 천천히, 하나씩 처리하는 것이 최선입니다.',
+      '때로는 멈추는 것도 지혜입니다. 오늘 하루 충분한 휴식을 취하세요.',
+    ],
+    lucky: [['방향: 중앙', '색상: 파랑', '숫자: 8', '아이템: 조개'],
+             ['방향: 북쪽', '색상: 하얀', '숫자: 0', '아이템: 구름']],
+    chance: 30
+  }
+];
+
+function pickGrade() {
+  const r = Math.random() * 100;
+  let cumulative = 0;
+  for (const g of grades) {
+    cumulative += g.chance;
+    if (r < cumulative) return g;
+  }
+  return grades[grades.length - 1];
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ── PARTICLE BURST ──────────────────────────────────────
+function burst(x, y, color) {
+  const container = document.createElement('div');
+  container.className = 'particle-burst';
+  container.style.left = x + 'px';
+  container.style.top = y + 'px';
+  document.body.appendChild(container);
+
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    const angle = (i / 18) * 360;
+    const dist = 60 + Math.random() * 80;
+    const size = 3 + Math.random() * 5;
+    p.style.cssText = `
+      position:absolute; width:${size}px; height:${size}px;
+      background:${color}; border-radius:50%;
+      transform:translate(-50%,-50%);
+      animation: particle-fly 0.8s ease-out forwards;
+      --dx:${Math.cos(angle * Math.PI/180) * dist}px;
+      --dy:${Math.sin(angle * Math.PI/180) * dist}px;
+    `;
+    container.appendChild(p);
+  }
+
+  // inject keyframe once
+  if (!document.getElementById('particle-kf')) {
+    const style = document.createElement('style');
+    style.id = 'particle-kf';
+    style.textContent = `
+      @keyframes particle-fly {
+        0%   { transform: translate(-50%,-50%) translate(0,0); opacity:1; }
+        100% { transform: translate(-50%,-50%) translate(var(--dx),var(--dy)); opacity:0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  setTimeout(() => container.remove(), 900);
+}
+
+// ── NAVIGATION ──────────────────────────────────────────
+function startGacha() {
+  const btn = document.getElementById('main-draw-btn');
+  const handle = document.getElementById('handle-group');
+  btn.disabled = true;
+
+  // spin handle
+  handle.classList.add('handle-spinning');
+  handle.addEventListener('animationend', () => {
+    handle.classList.remove('handle-spinning');
+  }, { once: true });
+
+  setTimeout(() => {
+    showResult();
+    btn.disabled = false;
+  }, 600);
+}
+
+function showResult() {
+  const grade = pickGrade();
+  const title = pick(grade.titles);
+  const text = pick(grade.texts);
+  const lucky = pick(grade.lucky);
+
+  const card = document.getElementById('result-card');
+  card.className = 'result-card ' + grade.color;
+  card.innerHTML = `
+    <div class="grade-badge ${grade.color}">${grade.label}</div>
+    <span class="capsule-emoji">${grade.emoji}</span>
+    <div class="fortune-title">${title}</div>
+    <div class="fortune-text">${text}</div>
+    <div class="lucky-items">
+      ${lucky.map(t => `<span class="lucky-tag">${t}</span>`).join('')}
+    </div>
+  `;
+
+  document.getElementById('main-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.remove('hidden');
+
+  // burst effect
+  const colors = { SSR:'#ffd700', SR:'#ff6eb4', R:'#b36eff', UC:'#39ff8f', N:'#4dd9ff' };
+  burst(window.innerWidth/2, window.innerHeight/2, colors[grade.id]);
+}
+
+function goBack() {
+  document.getElementById('result-screen').classList.add('hidden');
+  document.getElementById('main-screen').classList.remove('hidden');
+}
+
+// also allow clicking the machine
+document.getElementById('gacha-machine').addEventListener('click', startGacha);
+</script>
+</body>
+</html>
