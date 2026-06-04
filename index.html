@@ -121,11 +121,178 @@ body{font-family:'Galmuri11','Press Start 2P',monospace;background:var(--bg-deep
 .shake-flash{position:fixed;inset:0;background:rgba(77,217,255,.08);z-index:50;pointer-events:none;animation:flashFade .4s ease-out forwards;}
 @keyframes flashFade{0%{opacity:1;}100%{opacity:0;}}
 body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:999;}
+
+/* ── HAMBURGER BUTTON ── */
+#hamburger-btn{
+  position:fixed;top:18px;left:18px;z-index:200;
+  width:40px;height:40px;
+  background:rgba(10,22,40,0.85);
+  border:1px solid var(--gb);
+  backdrop-filter:blur(8px);
+  cursor:pointer;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
+  padding:8px;
+  transition:border-color .2s,box-shadow .2s;
+}
+#hamburger-btn:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(77,217,255,.35);}
+#hamburger-btn span{
+  display:block;width:20px;height:2px;
+  background:var(--cyan);
+  transition:transform .3s,opacity .3s,width .3s;
+  transform-origin:center;
+}
+#hamburger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+#hamburger-btn.open span:nth-child(2){opacity:0;width:0;}
+#hamburger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* ── PROB PANEL ── */
+#prob-panel{
+  position:fixed;top:0;left:0;
+  width:300px;height:100vh;
+  background:rgba(8,16,34,0.97);
+  border-right:1px solid var(--gb);
+  backdrop-filter:blur(16px);
+  z-index:190;
+  transform:translateX(-100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+#prob-panel.open{transform:translateX(0);}
+#prob-panel::-webkit-scrollbar{width:4px;}
+#prob-panel::-webkit-scrollbar-thumb{background:rgba(77,217,255,.2);border-radius:2px;}
+
+.prob-panel-header{
+  padding:22px 20px 16px;
+  border-bottom:1px solid var(--gb);
+  margin-top:60px;
+}
+.prob-panel-title{font-size:13px;color:var(--cyan);letter-spacing:3px;margin-bottom:4px;}
+.prob-panel-sub{font-size:8px;color:var(--dim);letter-spacing:1px;opacity:.7;}
+
+.prob-list{padding:16px 16px 30px;display:flex;flex-direction:column;gap:14px;}
+
+.prob-item{display:flex;flex-direction:column;gap:6px;}
+.prob-item-top{display:flex;justify-content:space-between;align-items:center;}
+.prob-item-label{font-size:11px;letter-spacing:1px;}
+.prob-item-pct{font-size:11px;letter-spacing:1px;}
+
+/* bar track */
+.prob-bar-track{
+  width:100%;height:8px;
+  background:rgba(255,255,255,.06);
+  position:relative;overflow:hidden;
+}
+.prob-bar-fill{
+  height:100%;width:0%;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.prob-bar-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:4px;
+  background:inherit;filter:brightness(2);
+}
+
+/* grade bar colors */
+.bar-SSR{background:linear-gradient(90deg,#a07000,#ffd700);}
+.bar-SR {background:linear-gradient(90deg,#a0306a,#ff6eb4);}
+.bar-R  {background:linear-gradient(90deg,#6030a0,#b36eff);}
+.bar-UC {background:linear-gradient(90deg,#1a8040,#39ff8f);}
+.bar-N  {background:linear-gradient(90deg,#1a607a,#4dd9ff);}
+
+.prob-item-desc{font-size:8px;color:var(--dim);line-height:1.8;opacity:.75;margin-top:2px;}
+
+.prob-panel-note{
+  margin:0 16px 20px;padding:12px 14px;
+  background:rgba(77,217,255,.05);
+  border:1px solid rgba(77,217,255,.15);
+  font-size:8px;color:var(--dim);line-height:2;letter-spacing:.5px;
+}
+
+/* overlay backdrop */
+#panel-backdrop{
+  position:fixed;inset:0;z-index:180;
+  background:rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;
+  transition:opacity .35s;
+}
+#panel-backdrop.open{opacity:1;pointer-events:all;}
 </style>
 </head>
 <body>
 <canvas id="stars-canvas"></canvas>
 <div class="nebula nb1"></div><div class="nebula nb2"></div><div class="nebula nb3"></div>
+
+<!-- HAMBURGER BUTTON -->
+<button id="hamburger-btn" onclick="togglePanel()" title="확률 보기">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- BACKDROP -->
+<div id="panel-backdrop" onclick="closePanel()"></div>
+
+<!-- PROBABILITY PANEL -->
+<div id="prob-panel">
+  <div class="prob-panel-header">
+    <div class="prob-panel-title">★ 등급 확률표</div>
+    <div class="prob-panel-sub">GRADE PROBABILITY</div>
+  </div>
+  <div class="prob-list">
+
+    <div class="prob-item">
+      <div class="prob-item-top">
+        <span class="prob-item-label c-SSR">★★★ SSR</span>
+        <span class="prob-item-pct c-SSR">5%</span>
+      </div>
+      <div class="prob-bar-track"><div class="prob-bar-fill bar-SSR" data-pct="5"></div></div>
+      <div class="prob-item-desc">오늘은 뽑기가 잘 될지 모릅니다.<br>최고의 행운 등급입니다.</div>
+    </div>
+
+    <div class="prob-item">
+      <div class="prob-item-top">
+        <span class="prob-item-label c-SR">★★ SR</span>
+        <span class="prob-item-pct c-SR">15%</span>
+      </div>
+      <div class="prob-bar-track"><div class="prob-bar-fill bar-SR" data-pct="15"></div></div>
+      <div class="prob-item-desc">오늘은 뽑기가 나쁘지 않습니다.<br>좋은 기운이 흐르는 날입니다.</div>
+    </div>
+
+    <div class="prob-item">
+      <div class="prob-item-top">
+        <span class="prob-item-label c-R">★ R</span>
+        <span class="prob-item-pct c-R">25%</span>
+      </div>
+      <div class="prob-bar-track"><div class="prob-bar-fill bar-R" data-pct="25"></div></div>
+      <div class="prob-item-desc">오늘은 뽑기가 보통입니다.<br>평범하지만 나쁘지 않은 하루.</div>
+    </div>
+
+    <div class="prob-item">
+      <div class="prob-item-top">
+        <span class="prob-item-label c-UC">◆ UC</span>
+        <span class="prob-item-pct c-UC">25%</span>
+      </div>
+      <div class="prob-bar-track"><div class="prob-bar-fill bar-UC" data-pct="25"></div></div>
+      <div class="prob-item-desc">오늘은 뽑기가 나쁠것 같습니다.<br>뚜껑 따기로 재도전 가능!</div>
+    </div>
+
+    <div class="prob-item">
+      <div class="prob-item-top">
+        <span class="prob-item-label c-N">◇ N</span>
+        <span class="prob-item-pct c-N">30%</span>
+      </div>
+      <div class="prob-bar-track"><div class="prob-bar-fill bar-N" data-pct="30"></div></div>
+      <div class="prob-item-desc">오늘은 뽑기가 잘 안될 수 있습니다.<br>뚜껑 따기로 재도전 가능!</div>
+    </div>
+
+  </div>
+  <div class="prob-panel-note">
+    💡 UC · N 등급은 결과 화면에서<br>
+    「머신 뚜껑 따기」 버튼으로<br>
+    한 번 더 도전할 수 있습니다.<br><br>
+    ※ 본 확률은 매 뽑기마다<br>
+    독립적으로 적용됩니다.
+  </div>
+</div>
 
 <!-- MAIN -->
 <div class="screen" id="main-screen">
@@ -226,6 +393,29 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <script>
+// PANEL
+let panelOpen=false;
+function togglePanel(){panelOpen?closePanel():openPanel();}
+function openPanel(){
+  panelOpen=true;
+  document.getElementById('prob-panel').classList.add('open');
+  document.getElementById('panel-backdrop').classList.add('open');
+  document.getElementById('hamburger-btn').classList.add('open');
+  // animate bars
+  setTimeout(()=>{
+    document.querySelectorAll('.prob-bar-fill').forEach(el=>{
+      el.style.width=el.dataset.pct+'%';
+    });
+  },100);
+}
+function closePanel(){
+  panelOpen=false;
+  document.getElementById('prob-panel').classList.remove('open');
+  document.getElementById('panel-backdrop').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+  document.querySelectorAll('.prob-bar-fill').forEach(el=>{el.style.width='0%';});
+}
+
 // STARS
 const canvas=document.getElementById('stars-canvas'),ctx=canvas.getContext('2d');let stars=[];
 function initStars(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;stars=[];for(let i=0;i<200;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,alpha:Math.random(),speed:Math.random()*.3+.05,tw:Math.random()*Math.PI*2});}
