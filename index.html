@@ -18,7 +18,7 @@ body{font-family:'Galmuri11','Press Start 2P',monospace;background:var(--bg-deep
 
 .screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
 .screen.hidden{display:none;}
-.main-layout{display:flex;align-items:flex-start;justify-content:center;gap:28px;width:100%;max-width:820px;}
+.main-layout{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:820px;}
 
 .page-title{font-size:clamp(24px,5vw,50px);color:var(--cyan);text-shadow:0 0 10px var(--cyan),0 0 30px rgba(77,217,255,.5),0 0 60px rgba(77,217,255,.2);letter-spacing:4px;text-align:center;margin-bottom:8px;animation:titlePulse 3s ease-in-out infinite;}
 @keyframes titlePulse{0%,100%{text-shadow:0 0 10px var(--cyan),0 0 30px rgba(77,217,255,.5);}50%{text-shadow:0 0 20px var(--cyan),0 0 60px rgba(77,217,255,.8),0 0 100px rgba(77,217,255,.3);}}
@@ -37,12 +37,34 @@ body{font-family:'Galmuri11','Press Start 2P',monospace;background:var(--bg-deep
 @keyframes floatCap{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 
 @keyframes shakeMachine{
-  0%{transform:rotate(0) translateX(0);}10%{transform:rotate(-6deg) translateX(-8px);}20%{transform:rotate(6deg) translateX(8px);}
-  30%{transform:rotate(-5deg) translateX(-6px);}40%{transform:rotate(5deg) translateX(6px);}50%{transform:rotate(-4deg) translateX(-4px);}
-  60%{transform:rotate(4deg) translateX(4px);}70%{transform:rotate(-2deg) translateX(-2px);}80%{transform:rotate(2deg) translateX(2px);}
-  90%{transform:rotate(-1deg) translateX(-1px);}100%{transform:rotate(0) translateX(0);}
+  0%   {transform:rotate(0deg) translateX(0);}
+  4%   {transform:rotate(-7deg) translateX(-10px);}
+  8%   {transform:rotate(7deg) translateX(10px);}
+  12%  {transform:rotate(-6deg) translateX(-8px);}
+  16%  {transform:rotate(6deg) translateX(8px);}
+  20%  {transform:rotate(-5deg) translateX(-7px);}
+  24%  {transform:rotate(5deg) translateX(7px);}
+  28%  {transform:rotate(-5deg) translateX(-6px);}
+  32%  {transform:rotate(5deg) translateX(6px);}
+  36%  {transform:rotate(-4deg) translateX(-5px);}
+  40%  {transform:rotate(4deg) translateX(5px);}
+  44%  {transform:rotate(-4deg) translateX(-5px);}
+  48%  {transform:rotate(4deg) translateX(5px);}
+  52%  {transform:rotate(-3deg) translateX(-4px);}
+  56%  {transform:rotate(3deg) translateX(4px);}
+  60%  {transform:rotate(-3deg) translateX(-3px);}
+  64%  {transform:rotate(3deg) translateX(3px);}
+  68%  {transform:rotate(-2deg) translateX(-2px);}
+  72%  {transform:rotate(2deg) translateX(2px);}
+  76%  {transform:rotate(-2deg) translateX(-2px);}
+  80%  {transform:rotate(2deg) translateX(2px);}
+  84%  {transform:rotate(-1deg) translateX(-1px);}
+  88%  {transform:rotate(1deg) translateX(1px);}
+  92%  {transform:rotate(-1deg) translateX(-1px);}
+  96%  {transform:rotate(1deg) translateX(1px);}
+  100% {transform:rotate(0deg) translateX(0);}
 }
-.shaking{animation:shakeMachine .7s ease-in-out;}
+.shaking{animation:shakeMachine 2.5s ease-in-out;}
 
 .handle-group{transform-origin:198px 220px;transition:transform .1s;}
 .handle-spinning{animation:spinHandle .5s ease-in-out;}
@@ -72,12 +94,44 @@ body{font-family:'Galmuri11','Press Start 2P',monospace;background:var(--bg-deep
 
 .c-SSR{color:#ffd700;} .c-SR{color:#ff6eb4;} .c-R{color:#b36eff;} .c-UC{color:#39ff8f;} .c-N{color:#4dd9ff;}
 
-.disclaimer{font-size:16px;color:var(--dim);text-align:center;letter-spacing:1px;margin-top:36px;opacity:.7;line-height:1.8;}
+.disclaimer{font-size:16px;color:var(--dim);text-align:center;letter-spacing:1px;margin-top:20px;opacity:.7;line-height:1.8;}
+
+/* BOTTOM LOG BAR */
+.log-bar{
+  width:100%;max-width:820px;
+  background:var(--glass);border:1px solid var(--gb);
+  backdrop-filter:blur(10px);
+}
+.log-bar-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 18px;border-bottom:1px solid var(--gb);
+}
+.log-bar-title{font-size:11px;color:var(--cyan);letter-spacing:2px;}
+.log-bar-date{font-size:9px;color:var(--dim);letter-spacing:1px;}
+.log-bar-body{
+  display:flex;flex-direction:row;gap:8px;
+  padding:10px 14px;
+  overflow-x:auto;min-height:62px;align-items:center;
+}
+.log-bar-body::-webkit-scrollbar{height:4px;}
+.log-bar-body::-webkit-scrollbar-thumb{background:rgba(77,217,255,.2);border-radius:2px;}
+.log-chip{
+  flex-shrink:0;
+  display:flex;flex-direction:column;gap:3px;
+  padding:7px 12px;
+  background:rgba(255,255,255,.03);
+  border-left:2px solid;
+  min-width:130px;
+}
+.log-chip-grade{font-size:8px;opacity:.7;}
+.log-chip-text{font-size:8px;line-height:1.5;}
+.log-chip-time{font-size:7px;opacity:.4;}
+.log-empty-bar{font-size:9px;color:var(--dim);opacity:.5;margin:auto;}
 
 /* RESULT */
-#result-screen{gap:24px;}
-.result-layout{display:flex;align-items:flex-start;justify-content:center;gap:24px;width:100%;max-width:820px;}
-.result-main{display:flex;flex-direction:column;align-items:center;gap:16px;flex:1;max-width:480px;}
+#result-screen{gap:20px;}
+.result-layout{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:820px;}
+.result-main{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:480px;}
 
 .result-card{max-width:480px;width:100%;background:var(--glass);border:1px solid var(--gb);padding:32px 26px;position:relative;text-align:center;backdrop-filter:blur(10px);animation:cardReveal .8s cubic-bezier(.34,1.56,.64,1) both;}
 @keyframes cardReveal{from{opacity:0;transform:scale(.6) translateY(30px);}to{opacity:1;transform:scale(1) translateY(0);}}
@@ -363,11 +417,15 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <p class="space-hint">[ SPACE ] 키로도 뽑을 수 있습니다</p>
     </div>
 
-    <div class="sidebar" id="sidebar-main">
-      <div class="sidebar-header">📋 뽑기 기록</div>
-      <div class="sidebar-date" id="sidebar-date-main"></div>
-      <div class="sidebar-log-title">▸ 오늘의 내역</div>
-      <div class="sidebar-log" id="log-main"><div class="log-empty">아직 뽑기 기록이<br>없습니다.</div></div>
+    <!-- BOTTOM LOG BAR -->
+    <div class="log-bar" id="log-bar-main">
+      <div class="log-bar-header">
+        <span class="log-bar-title">📋 뽑기 기록</span>
+        <span class="log-bar-date" id="sidebar-date-main"></span>
+      </div>
+      <div class="log-bar-body" id="log-main">
+        <span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>
+      </div>
     </div>
   </div>
   <p class="disclaimer">재미로만 즐겨 주십시오.</p>
@@ -382,14 +440,18 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <div class="result-card" id="result-card"></div>
       <div class="result-actions" id="result-actions"></div>
     </div>
-    <div class="sidebar" id="sidebar-result">
-      <div class="sidebar-header">📋 뽑기 기록</div>
-      <div class="sidebar-date" id="sidebar-date-result"></div>
-      <div class="sidebar-log-title">▸ 오늘의 내역</div>
-      <div class="sidebar-log" id="log-result"><div class="log-empty">아직 뽑기 기록이<br>없습니다.</div></div>
+    <!-- BOTTOM LOG BAR -->
+    <div class="log-bar" id="log-bar-result">
+      <div class="log-bar-header">
+        <span class="log-bar-title">📋 뽑기 기록</span>
+        <span class="log-bar-date" id="sidebar-date-result"></span>
+      </div>
+      <div class="log-bar-body" id="log-result">
+        <span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>
+      </div>
     </div>
   </div>
-  <p class="disclaimer" style="margin-top:20px;">재미로만 즐겨 주십시오.</p>
+  <p class="disclaimer" style="margin-top:16px;">재미로만 즐겨 주십시오.</p>
 </div>
 
 <script>
@@ -467,13 +529,15 @@ function fmtTime(){const n=new Date();return`${String(n.getHours()).padStart(2,'
 function renderLog(logId){
   const el=document.getElementById(logId);
   if(!el)return;
-  if(drawLog.length===0){el.innerHTML='<div class="log-empty">아직 뽑기 기록이<br>없습니다.</div>';return;}
+  if(drawLog.length===0){el.innerHTML='<span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>';return;}
   el.innerHTML=drawLog.slice().reverse().map(e=>`
-    <div class="log-item ${e.ccolor}" style="border-left-color:${e.borderColor}">
-      <span class="log-item-grade">${e.label}</span>
-      <span class="log-item-text">${e.verdict}</span>
-      <span class="log-item-time">${e.time}</span>
+    <div class="log-chip ${e.ccolor}" style="border-left-color:${e.borderColor}">
+      <span class="log-chip-grade">${e.label}</span>
+      <span class="log-chip-text">${e.verdict}</span>
+      <span class="log-chip-time">${e.time}</span>
     </div>`).join('');
+  // scroll to newest (left)
+  el.scrollLeft=0;
 }
 
 function updateSidebars(){
@@ -512,10 +576,30 @@ function startGacha(){
   busy=true;
   const btn=document.getElementById('main-draw-btn');
   const handle=document.getElementById('handle-group');
+  const machine=document.getElementById('gacha-machine');
   btn.disabled=true;
+
+  // 머신 2.5초 흔들기
+  machine.classList.add('shaking');
   handle.classList.add('handle-spinning');
   handle.addEventListener('animationend',()=>handle.classList.remove('handle-spinning'),{once:true});
-  setTimeout(()=>{showResult();btn.disabled=false;busy=false;},600);
+
+  // 흔드는 도중 플래시 효과 2번
+  [400, 1400].forEach(t=>{
+    setTimeout(()=>{
+      const flash=document.createElement('div');flash.className='shake-flash';document.body.appendChild(flash);
+      setTimeout(()=>flash.remove(),400);
+    },t);
+  });
+
+  // 2.5초 후 결과
+  setTimeout(()=>{
+    machine.classList.remove('shaking');
+    machine.addEventListener('animationend',()=>{},{ once:true });
+    showResult();
+    btn.disabled=false;
+    busy=false;
+  },2500);
 }
 
 function showResult(){
