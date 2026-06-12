@@ -2,350 +2,227 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>오늘의 뽑기 운세</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
 <style>
-:root{--bg-deep:#0a1628;--bg-mid:#0f2244;--cyan:#4dd9ff;--gold:#ffd700;--pink:#ff6eb4;--green:#39ff8f;--purple:#b36eff;--text:#e8f4ff;--dim:#7aa8cc;--glass:rgba(255,255,255,0.06);--gb:rgba(77,217,255,0.22);}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Galmuri11','Press Start 2P',monospace;background:var(--bg-deep);color:var(--text);min-height:100vh;overflow-x:hidden;}
+:root{
+  --cyan:#4dd9ff;--gold:#ffd700;--pink:#ff6eb4;--green:#39ff8f;--purple:#b36eff;
+  --text:#e8f4ff;--dim:#7aa8cc;
+  --glass:rgba(255,255,255,0.06);--gb:rgba(77,217,255,0.22);
+  --ms:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{font-family:'Galmuri11','Press Start 2P',monospace;background:#0a1628;color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* BG */
 #stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.nebula{position:fixed;border-radius:50%;filter:blur(80px);opacity:.18;pointer-events:none;z-index:0;}
-.nb1{width:600px;height:400px;background:radial-gradient(circle,#3a6fd8,transparent);top:-100px;left:-150px;}
-.nb2{width:500px;height:500px;background:radial-gradient(circle,#6b2fa0,transparent);bottom:-80px;right:-100px;}
-.nb3{width:350px;height:350px;background:radial-gradient(circle,#1a7a9e,transparent);top:40%;left:50%;}
+.nebula{position:fixed;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none;z-index:0;}
+.nb1{width:500px;height:350px;background:radial-gradient(circle,#3a6fd8,transparent);top:-80px;left:-120px;}
+.nb2{width:400px;height:400px;background:radial-gradient(circle,#6b2fa0,transparent);bottom:-60px;right:-80px;}
+.nb3{width:300px;height:300px;background:radial-gradient(circle,#1a7a9e,transparent);top:40%;left:50%;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:998;}
 
-.screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+/* SCREENS */
+.screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:70px 16px 32px;}
 .screen.hidden{display:none;}
-.main-layout{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:820px;}
 
-.page-title{font-size:clamp(24px,5vw,50px);color:var(--cyan);text-shadow:0 0 10px var(--cyan),0 0 30px rgba(77,217,255,.5),0 0 60px rgba(77,217,255,.2);letter-spacing:4px;text-align:center;margin-bottom:8px;animation:titlePulse 3s ease-in-out infinite;}
-@keyframes titlePulse{0%,100%{text-shadow:0 0 10px var(--cyan),0 0 30px rgba(77,217,255,.5);}50%{text-shadow:0 0 20px var(--cyan),0 0 60px rgba(77,217,255,.8),0 0 100px rgba(77,217,255,.3);}}
-.page-subtitle{font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:36px;text-align:center;}
+/* TITLE */
+.page-title{font-size:clamp(17px,5vw,46px);color:var(--cyan);text-shadow:0 0 10px var(--cyan),0 0 30px rgba(77,217,255,.5);letter-spacing:clamp(2px,1vw,4px);text-align:center;margin-bottom:6px;animation:titlePulse 3s ease-in-out infinite;line-height:1.4;}
+@keyframes titlePulse{0%,100%{text-shadow:0 0 10px var(--cyan),0 0 28px rgba(77,217,255,.5);}50%{text-shadow:0 0 18px var(--cyan),0 0 55px rgba(77,217,255,.8),0 0 90px rgba(77,217,255,.3);}}
+.page-subtitle{font-size:clamp(7px,1.8vw,10px);color:var(--dim);letter-spacing:2px;margin-bottom:22px;text-align:center;}
 
-.gacha-wrapper{display:flex;flex-direction:column;align-items:center;gap:20px;}
+/* LAYOUT */
+.main-layout{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:580px;}
 
-.gacha-machine{width:260px;height:320px;position:relative;cursor:grab;filter:drop-shadow(0 0 20px rgba(77,217,255,.3));transition:filter .2s;}
-.gacha-machine:hover{filter:drop-shadow(0 0 32px rgba(77,217,255,.55));}
+/* MACHINE */
+.gacha-wrapper{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+.gacha-machine{width:var(--ms);height:calc(var(--ms)*1.23);cursor:pointer;filter:drop-shadow(0 0 18px rgba(77,217,255,.3));transition:filter .2s;touch-action:manipulation;}
+.gacha-machine:hover{filter:drop-shadow(0 0 28px rgba(77,217,255,.5));}
 .gacha-machine svg{width:100%;height:100%;}
-
-.shake-hint{font-size:10px;color:var(--dim);text-align:center;letter-spacing:1px;animation:hintBlink 2s ease-in-out infinite;}
-@keyframes hintBlink{0%,100%{opacity:.45;}50%{opacity:1;}}
-
+.shake-hint{font-size:clamp(8px,2.2vw,10px);color:var(--dim);text-align:center;letter-spacing:1px;animation:hintBlink 2s ease-in-out infinite;}
+@keyframes hintBlink{0%,100%{opacity:.4;}50%{opacity:1;}}
 .capsule-display{animation:floatCap 2.5s ease-in-out infinite;}
-@keyframes floatCap{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes floatCap{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
 
 @keyframes shakeMachine{
-  0%   {transform:rotate(0deg) translateX(0);}
-  4%   {transform:rotate(-7deg) translateX(-10px);}
-  8%   {transform:rotate(7deg) translateX(10px);}
-  12%  {transform:rotate(-6deg) translateX(-8px);}
-  16%  {transform:rotate(6deg) translateX(8px);}
-  20%  {transform:rotate(-5deg) translateX(-7px);}
-  24%  {transform:rotate(5deg) translateX(7px);}
-  28%  {transform:rotate(-5deg) translateX(-6px);}
-  32%  {transform:rotate(5deg) translateX(6px);}
-  36%  {transform:rotate(-4deg) translateX(-5px);}
-  40%  {transform:rotate(4deg) translateX(5px);}
-  44%  {transform:rotate(-4deg) translateX(-5px);}
-  48%  {transform:rotate(4deg) translateX(5px);}
-  52%  {transform:rotate(-3deg) translateX(-4px);}
-  56%  {transform:rotate(3deg) translateX(4px);}
-  60%  {transform:rotate(-3deg) translateX(-3px);}
-  64%  {transform:rotate(3deg) translateX(3px);}
-  68%  {transform:rotate(-2deg) translateX(-2px);}
-  72%  {transform:rotate(2deg) translateX(2px);}
-  76%  {transform:rotate(-2deg) translateX(-2px);}
-  80%  {transform:rotate(2deg) translateX(2px);}
-  84%  {transform:rotate(-1deg) translateX(-1px);}
-  88%  {transform:rotate(1deg) translateX(1px);}
-  92%  {transform:rotate(-1deg) translateX(-1px);}
-  96%  {transform:rotate(1deg) translateX(1px);}
-  100% {transform:rotate(0deg) translateX(0);}
+  0%  {transform:rotate(0deg) translateX(0);}4%{transform:rotate(-7deg) translateX(-10px);}
+  8%  {transform:rotate(7deg) translateX(10px);}12%{transform:rotate(-6deg) translateX(-8px);}
+  16% {transform:rotate(6deg) translateX(8px);}20%{transform:rotate(-5deg) translateX(-7px);}
+  24% {transform:rotate(5deg) translateX(7px);}28%{transform:rotate(-5deg) translateX(-6px);}
+  32% {transform:rotate(5deg) translateX(6px);}36%{transform:rotate(-4deg) translateX(-5px);}
+  40% {transform:rotate(4deg) translateX(5px);}44%{transform:rotate(-4deg) translateX(-5px);}
+  48% {transform:rotate(4deg) translateX(5px);}52%{transform:rotate(-3deg) translateX(-4px);}
+  56% {transform:rotate(3deg) translateX(4px);}60%{transform:rotate(-3deg) translateX(-3px);}
+  64% {transform:rotate(3deg) translateX(3px);}68%{transform:rotate(-2deg) translateX(-2px);}
+  72% {transform:rotate(2deg) translateX(2px);}76%{transform:rotate(-2deg) translateX(-2px);}
+  80% {transform:rotate(2deg) translateX(2px);}84%{transform:rotate(-1deg) translateX(-1px);}
+  88% {transform:rotate(1deg) translateX(1px);}92%{transform:rotate(-1deg) translateX(-1px);}
+  96% {transform:rotate(1deg) translateX(1px);}100%{transform:rotate(0deg) translateX(0);}
 }
 .shaking{animation:shakeMachine 2.5s ease-in-out;}
-
-.handle-group{transform-origin:198px 220px;transition:transform .1s;}
+.handle-group{transform-origin:198px 220px;}
 .handle-spinning{animation:spinHandle .5s ease-in-out;}
 @keyframes spinHandle{0%{transform:rotate(0);}40%{transform:rotate(120deg);}70%{transform:rotate(100deg);}100%{transform:rotate(0);}}
 
-.gacha-btn{font-family:'Galmuri11','Press Start 2P',monospace;font-size:14px;padding:15px 34px;background:linear-gradient(135deg,#1a3a6e,#0f2244);border:2px solid var(--cyan);color:var(--cyan);cursor:pointer;letter-spacing:2px;position:relative;overflow:hidden;transition:all .2s;box-shadow:0 0 15px rgba(77,217,255,.3),inset 0 0 15px rgba(77,217,255,.05);}
+/* BUTTON */
+.gacha-btn{
+  font-family:'Galmuri11','Press Start 2P',monospace;
+  font-size:clamp(12px,3.2vw,15px);padding:clamp(12px,3vw,16px) clamp(24px,6vw,38px);
+  background:linear-gradient(135deg,#1a3a6e,#0f2244);border:2px solid var(--cyan);color:var(--cyan);
+  cursor:pointer;letter-spacing:2px;position:relative;overflow:hidden;transition:all .2s;
+  box-shadow:0 0 15px rgba(77,217,255,.3),inset 0 0 12px rgba(77,217,255,.05);
+  width:100%;max-width:280px;touch-action:manipulation;
+}
 .gacha-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(77,217,255,.1));opacity:0;transition:opacity .2s;}
-.gacha-btn:hover{box-shadow:0 0 30px rgba(77,217,255,.6),inset 0 0 20px rgba(77,217,255,.1);transform:translateY(-2px);}
+.gacha-btn:hover{box-shadow:0 0 28px rgba(77,217,255,.6);transform:translateY(-2px);}
 .gacha-btn:hover::before{opacity:1;}
 .gacha-btn:active{transform:translateY(1px);}
 .gacha-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
-.space-hint{font-size:9px;color:var(--dim);letter-spacing:1px;opacity:.6;margin-top:-8px;}
+.space-hint{font-size:8px;color:var(--dim);letter-spacing:1px;opacity:.55;margin-top:-6px;text-align:center;}
 
-/* SIDEBAR */
-.sidebar{width:220px;min-width:200px;background:var(--glass);border:1px solid var(--gb);backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:0;flex-shrink:0;align-self:stretch;}
-.sidebar-header{padding:14px 16px 12px;border-bottom:1px solid var(--gb);font-size:11px;color:var(--cyan);letter-spacing:2px;}
-.sidebar-date{padding:12px 16px;border-bottom:1px solid rgba(77,217,255,.1);font-size:10px;color:var(--dim);line-height:2;}
-.sidebar-log-title{padding:10px 16px 6px;font-size:9px;color:var(--dim);letter-spacing:2px;opacity:.7;}
-.sidebar-log{flex:1;overflow-y:auto;padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;max-height:320px;}
-.sidebar-log::-webkit-scrollbar{width:4px;}
-.sidebar-log::-webkit-scrollbar-thumb{background:rgba(77,217,255,.2);border-radius:2px;}
-.log-item{font-size:10px;padding:8px 10px;background:rgba(255,255,255,.03);border-left:2px solid;line-height:1.7;display:flex;flex-direction:column;gap:2px;}
-.log-item-grade{font-size:8px;opacity:.7;}
-.log-item-text{font-size:9px;}
-.log-item-time{font-size:8px;opacity:.45;}
-.log-empty{font-size:9px;color:var(--dim);opacity:.5;text-align:center;padding:20px 0;line-height:2;}
-
-.c-SSR{color:#ffd700;} .c-SR{color:#ff6eb4;} .c-R{color:#b36eff;} .c-UC{color:#39ff8f;} .c-N{color:#4dd9ff;}
-
-.disclaimer{font-size:16px;color:var(--dim);text-align:center;letter-spacing:1px;margin-top:20px;opacity:.7;line-height:1.8;}
-
-/* BOTTOM LOG BAR */
-.log-bar{
-  width:100%;max-width:820px;
-  background:var(--glass);border:1px solid var(--gb);
-  backdrop-filter:blur(10px);
-}
-.log-bar-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 18px;border-bottom:1px solid var(--gb);
-}
-.log-bar-title{font-size:11px;color:var(--cyan);letter-spacing:2px;}
-.log-bar-date{font-size:9px;color:var(--dim);letter-spacing:1px;}
-.log-bar-body{
-  display:flex;flex-direction:row;gap:8px;
-  padding:10px 14px;
-  overflow-x:auto;min-height:62px;align-items:center;
-}
-.log-bar-body::-webkit-scrollbar{height:4px;}
+/* LOG BAR */
+.log-bar{width:100%;max-width:580px;background:var(--glass);border:1px solid var(--gb);backdrop-filter:blur(10px);}
+.log-bar-header{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid var(--gb);flex-wrap:wrap;gap:4px;}
+.log-bar-title{font-size:clamp(9px,2.2vw,11px);color:var(--cyan);letter-spacing:2px;}
+.log-bar-date{font-size:clamp(7px,1.8vw,9px);color:var(--dim);}
+.log-bar-body{display:flex;flex-direction:row;gap:8px;padding:9px 12px;overflow-x:auto;min-height:56px;align-items:center;-webkit-overflow-scrolling:touch;}
+.log-bar-body::-webkit-scrollbar{height:3px;}
 .log-bar-body::-webkit-scrollbar-thumb{background:rgba(77,217,255,.2);border-radius:2px;}
-.log-chip{
-  flex-shrink:0;
-  display:flex;flex-direction:column;gap:3px;
-  padding:7px 12px;
-  background:rgba(255,255,255,.03);
-  border-left:2px solid;
-  min-width:130px;
-}
-.log-chip-grade{font-size:8px;opacity:.7;}
+.log-chip{flex-shrink:0;display:flex;flex-direction:column;gap:3px;padding:6px 10px;background:rgba(255,255,255,.03);border-left:2px solid;min-width:116px;}
+.log-chip-grade{font-size:7px;opacity:.7;}
 .log-chip-text{font-size:8px;line-height:1.5;}
 .log-chip-time{font-size:7px;opacity:.4;}
-.log-empty-bar{font-size:9px;color:var(--dim);opacity:.5;margin:auto;}
+.log-empty-bar{font-size:8px;color:var(--dim);opacity:.5;margin:auto;text-align:center;}
+
+/* COLORS */
+.c-SSR{color:#ffd700;}.c-SR{color:#ff6eb4;}.c-R{color:#b36eff;}.c-UC{color:#39ff8f;}.c-N{color:#4dd9ff;}
+
+.disclaimer{font-size:clamp(11px,3vw,16px);color:var(--dim);text-align:center;opacity:.7;line-height:1.8;margin-top:16px;padding:0 8px;}
 
 /* RESULT */
-#result-screen{gap:20px;}
-.result-layout{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:820px;}
-.result-main{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:480px;}
-
-.result-card{max-width:480px;width:100%;background:var(--glass);border:1px solid var(--gb);padding:32px 26px;position:relative;text-align:center;backdrop-filter:blur(10px);animation:cardReveal .8s cubic-bezier(.34,1.56,.64,1) both;}
-@keyframes cardReveal{from{opacity:0;transform:scale(.6) translateY(30px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.result-card::before,.result-card::after{content:'';position:absolute;width:16px;height:16px;border-color:var(--cyan);border-style:solid;}
+#result-screen{padding-top:60px;}
+.result-layout{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:580px;}
+.result-main{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+.result-card{width:100%;background:var(--glass);border:1px solid var(--gb);padding:clamp(16px,4vw,30px) clamp(14px,4vw,26px);position:relative;text-align:center;backdrop-filter:blur(10px);animation:cardReveal .8s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes cardReveal{from{opacity:0;transform:scale(.6) translateY(28px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.result-card::before,.result-card::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;}
 .result-card::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
 .result-card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
 
-.grade-badge{display:inline-block;font-size:10px;padding:6px 14px;letter-spacing:3px;margin-bottom:16px;}
-.grade-SSR{color:#ffd700;border:1px solid #ffd700;box-shadow:0 0 20px rgba(255,215,0,.5);text-shadow:0 0 10px #ffd700;}
-.grade-SR{color:#ff6eb4;border:1px solid #ff6eb4;box-shadow:0 0 20px rgba(255,110,180,.5);text-shadow:0 0 10px #ff6eb4;}
-.grade-R{color:#b36eff;border:1px solid #b36eff;box-shadow:0 0 20px rgba(179,110,255,.5);text-shadow:0 0 10px #b36eff;}
-.grade-N{color:#4dd9ff;border:1px solid #4dd9ff;box-shadow:0 0 15px rgba(77,217,255,.4);}
-.grade-UC{color:#39ff8f;border:1px solid #39ff8f;box-shadow:0 0 15px rgba(57,255,143,.4);text-shadow:0 0 10px #39ff8f;}
+.grade-badge{display:inline-block;font-size:clamp(8px,2vw,10px);padding:5px 12px;letter-spacing:2px;margin-bottom:14px;}
+.grade-SSR{color:#ffd700;border:1px solid #ffd700;box-shadow:0 0 18px rgba(255,215,0,.5);text-shadow:0 0 10px #ffd700;}
+.grade-SR{color:#ff6eb4;border:1px solid #ff6eb4;box-shadow:0 0 18px rgba(255,110,180,.5);text-shadow:0 0 10px #ff6eb4;}
+.grade-R{color:#b36eff;border:1px solid #b36eff;box-shadow:0 0 18px rgba(179,110,255,.5);text-shadow:0 0 10px #b36eff;}
+.grade-N{color:#4dd9ff;border:1px solid #4dd9ff;box-shadow:0 0 14px rgba(77,217,255,.4);}
+.grade-UC{color:#39ff8f;border:1px solid #39ff8f;box-shadow:0 0 14px rgba(57,255,143,.4);text-shadow:0 0 10px #39ff8f;}
 
-.capsule-emoji{font-size:60px;display:block;margin:6px 0 16px;animation:bounceIn .6s .2s cubic-bezier(.34,1.56,.64,1) both;}
+.capsule-emoji{font-size:clamp(42px,10vw,60px);display:block;margin:4px 0 14px;animation:bounceIn .6s .2s cubic-bezier(.34,1.56,.64,1) both;}
 @keyframes bounceIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.fortune-verdict{font-size:clamp(12px,3.2vw,15px);line-height:1.9;margin-bottom:10px;animation:fadeUp .5s .3s both;}
+.fortune-title{font-size:clamp(9px,2.3vw,11px);margin-bottom:10px;line-height:1.8;animation:fadeUp .5s .5s both;}
+.fortune-text{font-size:clamp(8px,2vw,9px);color:var(--dim);line-height:2.2;animation:fadeUp .5s .7s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.todays-quote{margin-top:14px;padding:11px 13px;background:rgba(255,255,255,.04);border-left:3px solid currentColor;text-align:left;animation:fadeUp .5s .9s both;}
+.todays-quote-label{font-size:clamp(7px,1.8vw,8px);opacity:.55;letter-spacing:2px;margin-bottom:7px;display:block;}
+.todays-quote-text{font-size:clamp(9px,2.3vw,11px);line-height:2;}
 
-.fortune-verdict{font-size:15px;line-height:1.9;margin-bottom:12px;animation:fadeUp .5s .3s both;}
-.fortune-title{font-size:11px;margin-bottom:12px;line-height:1.8;animation:fadeUp .5s .5s both;}
-.fortune-text{font-size:9px;color:var(--dim);line-height:2.2;animation:fadeUp .5s .7s both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-
-.todays-quote{margin-top:18px;padding:14px 16px;background:rgba(255,255,255,.04);border-left:3px solid currentColor;text-align:left;animation:fadeUp .5s .9s both;}
-.todays-quote-label{font-size:8px;opacity:.55;letter-spacing:2px;margin-bottom:8px;display:block;}
-.todays-quote-text{font-size:11px;line-height:2;}
-
-.result-actions{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:480px;}
-
-.lid-btn{font-family:'Galmuri11','Press Start 2P',monospace;font-size:13px;padding:13px 28px;background:linear-gradient(135deg,#2a1a4e,#1a0d38);border:2px solid var(--purple);color:var(--purple);cursor:pointer;letter-spacing:2px;transition:all .2s;box-shadow:0 0 15px rgba(179,110,255,.3);width:100%;}
-.lid-btn:hover{box-shadow:0 0 30px rgba(179,110,255,.6);transform:translateY(-2px);}
+.result-actions{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+.lid-btn{font-family:'Galmuri11','Press Start 2P',monospace;font-size:clamp(10px,2.5vw,13px);padding:clamp(11px,3vw,14px) clamp(18px,4vw,28px);background:linear-gradient(135deg,#2a1a4e,#1a0d38);border:2px solid var(--purple);color:var(--purple);cursor:pointer;letter-spacing:1px;transition:all .2s;box-shadow:0 0 14px rgba(179,110,255,.3);width:100%;touch-action:manipulation;}
+.lid-btn:hover{box-shadow:0 0 26px rgba(179,110,255,.6);transform:translateY(-2px);}
 .lid-btn:active{transform:translateY(1px);}
 .lid-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
-
 @keyframes lidCrack{0%{transform:rotate(0) scale(1);}25%{transform:rotate(-3deg) scale(1.04);}50%{transform:rotate(3deg) scale(1.08);}75%{transform:rotate(-2deg) scale(1.04);}100%{transform:rotate(0) scale(1);}}
 .cracking{animation:lidCrack .5s ease-in-out;}
-
-.back-btn{font-family:'Galmuri11','Press Start 2P',monospace;font-size:10px;padding:11px 22px;background:transparent;border:1px solid var(--dim);color:var(--dim);cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.back-btn{font-family:'Galmuri11','Press Start 2P',monospace;font-size:clamp(9px,2.2vw,10px);padding:clamp(10px,3vw,12px) clamp(16px,4vw,22px);background:transparent;border:1px solid var(--dim);color:var(--dim);cursor:pointer;letter-spacing:1px;transition:all .2s;width:100%;touch-action:manipulation;}
 .back-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 
-.particle-burst{position:fixed;pointer-events:none;z-index:100;}
-.shake-flash{position:fixed;inset:0;background:rgba(77,217,255,.08);z-index:50;pointer-events:none;animation:flashFade .4s ease-out forwards;}
-@keyframes flashFade{0%{opacity:1;}100%{opacity:0;}}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:999;}
-
-/* ── HAMBURGER BUTTON ── */
-#hamburger-btn{
-  position:fixed;top:18px;left:18px;z-index:200;
-  width:40px;height:40px;
-  background:rgba(10,22,40,0.85);
-  border:1px solid var(--gb);
-  backdrop-filter:blur(8px);
-  cursor:pointer;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
-  padding:8px;
-  transition:border-color .2s,box-shadow .2s;
-}
+/* HAMBURGER */
+#hamburger-btn{position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;background:rgba(8,16,34,0.88);border:1px solid var(--gb);backdrop-filter:blur(8px);cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:9px;transition:border-color .2s,box-shadow .2s;touch-action:manipulation;}
 #hamburger-btn:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(77,217,255,.35);}
-#hamburger-btn span{
-  display:block;width:20px;height:2px;
-  background:var(--cyan);
-  transition:transform .3s,opacity .3s,width .3s;
-  transform-origin:center;
-}
+#hamburger-btn span{display:block;width:20px;height:2px;background:var(--cyan);transition:transform .3s,opacity .3s,width .3s;transform-origin:center;}
 #hamburger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
 #hamburger-btn.open span:nth-child(2){opacity:0;width:0;}
 #hamburger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
-/* ── PROB PANEL ── */
-#prob-panel{
-  position:fixed;top:0;left:0;
-  width:300px;height:100vh;
-  background:rgba(8,16,34,0.97);
-  border-right:1px solid var(--gb);
-  backdrop-filter:blur(16px);
-  z-index:190;
-  transform:translateX(-100%);
-  transition:transform .35s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;
-  overflow-y:auto;
-}
+/* PROB PANEL */
+#prob-panel{position:fixed;top:0;left:0;width:min(300px,88vw);height:100vh;background:rgba(8,16,34,0.97);border-right:1px solid var(--gb);backdrop-filter:blur(16px);z-index:190;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto;}
 #prob-panel.open{transform:translateX(0);}
-#prob-panel::-webkit-scrollbar{width:4px;}
+#prob-panel::-webkit-scrollbar{width:3px;}
 #prob-panel::-webkit-scrollbar-thumb{background:rgba(77,217,255,.2);border-radius:2px;}
-
-.prob-panel-header{
-  padding:22px 20px 16px;
-  border-bottom:1px solid var(--gb);
-  margin-top:60px;
-}
-.prob-panel-title{font-size:13px;color:var(--cyan);letter-spacing:3px;margin-bottom:4px;}
-.prob-panel-sub{font-size:8px;color:var(--dim);letter-spacing:1px;opacity:.7;}
-
-.prob-list{padding:16px 16px 30px;display:flex;flex-direction:column;gap:14px;}
-
-.prob-item{display:flex;flex-direction:column;gap:6px;}
+.prob-panel-header{padding:18px 16px 12px;border-bottom:1px solid var(--gb);margin-top:56px;}
+.prob-panel-title{font-size:clamp(11px,3vw,13px);color:var(--cyan);letter-spacing:3px;margin-bottom:4px;}
+.prob-panel-sub{font-size:clamp(7px,2vw,8px);color:var(--dim);letter-spacing:1px;opacity:.7;}
+.prob-list{padding:14px 14px 20px;display:flex;flex-direction:column;gap:14px;}
+.prob-item{display:flex;flex-direction:column;gap:5px;}
 .prob-item-top{display:flex;justify-content:space-between;align-items:center;}
-.prob-item-label{font-size:11px;letter-spacing:1px;}
-.prob-item-pct{font-size:11px;letter-spacing:1px;}
-
-/* bar track */
-.prob-bar-track{
-  width:100%;height:8px;
-  background:rgba(255,255,255,.06);
-  position:relative;overflow:hidden;
-}
-.prob-bar-fill{
-  height:100%;width:0%;
-  transition:width .8s cubic-bezier(.4,0,.2,1);
-  position:relative;
-}
-.prob-bar-fill::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:4px;
-  background:inherit;filter:brightness(2);
-}
-
-/* grade bar colors */
+.prob-item-label,.prob-item-pct{font-size:clamp(9px,2.5vw,11px);letter-spacing:1px;}
+.prob-bar-track{width:100%;height:7px;background:rgba(255,255,255,.06);overflow:hidden;}
+.prob-bar-fill{height:100%;width:0%;transition:width .8s cubic-bezier(.4,0,.2,1);position:relative;}
+.prob-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:inherit;filter:brightness(2);}
 .bar-SSR{background:linear-gradient(90deg,#a07000,#ffd700);}
-.bar-SR {background:linear-gradient(90deg,#a0306a,#ff6eb4);}
-.bar-R  {background:linear-gradient(90deg,#6030a0,#b36eff);}
-.bar-UC {background:linear-gradient(90deg,#1a8040,#39ff8f);}
-.bar-N  {background:linear-gradient(90deg,#1a607a,#4dd9ff);}
-
-.prob-item-desc{font-size:8px;color:var(--dim);line-height:1.8;opacity:.75;margin-top:2px;}
-
-.prob-panel-note{
-  margin:0 16px 20px;padding:12px 14px;
-  background:rgba(77,217,255,.05);
-  border:1px solid rgba(77,217,255,.15);
-  font-size:8px;color:var(--dim);line-height:2;letter-spacing:.5px;
-}
-
-/* overlay backdrop */
-#panel-backdrop{
-  position:fixed;inset:0;z-index:180;
-  background:rgba(0,0,0,.4);
-  opacity:0;pointer-events:none;
-  transition:opacity .35s;
-}
+.bar-SR{background:linear-gradient(90deg,#a0306a,#ff6eb4);}
+.bar-R{background:linear-gradient(90deg,#6030a0,#b36eff);}
+.bar-UC{background:linear-gradient(90deg,#1a8040,#39ff8f);}
+.bar-N{background:linear-gradient(90deg,#1a607a,#4dd9ff);}
+.prob-item-desc{font-size:clamp(7px,2vw,8px);color:var(--dim);line-height:1.8;opacity:.75;margin-top:1px;}
+.prob-panel-note{margin:0 14px 20px;padding:11px 13px;background:rgba(77,217,255,.05);border:1px solid rgba(77,217,255,.15);font-size:clamp(7px,2vw,8px);color:var(--dim);line-height:2;letter-spacing:.5px;}
+#panel-backdrop{position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .35s;}
 #panel-backdrop.open{opacity:1;pointer-events:all;}
+
+/* FX */
+.shake-flash{position:fixed;inset:0;background:rgba(77,217,255,.08);z-index:50;pointer-events:none;animation:flashFade .4s ease-out forwards;}
+@keyframes flashFade{0%{opacity:1;}100%{opacity:0;}}
+.particle-burst{position:fixed;pointer-events:none;z-index:100;}
+
+/* ── RESPONSIVE ── */
+@media(min-width:600px){
+  :root{--ms:265px;}
+  .screen{padding:80px 24px 36px;}
+  .main-layout,.log-bar,.result-layout{max-width:660px;}
+  .gacha-btn{max-width:300px;}
+}
+@media(min-width:900px){
+  :root{--ms:280px;}
+  .screen{padding:50px 32px 40px;justify-content:center;}
+  .main-layout,.log-bar,.result-layout{max-width:820px;}
+  .gacha-btn{max-width:320px;}
+}
+@media(max-width:380px){
+  :root{--ms:195px;}
+  .screen{padding:60px 10px 22px;}
+  .log-chip{min-width:100px;}
+  .gacha-btn{font-size:11px;padding:11px 18px;}
+  .prob-panel-header{margin-top:50px;}
+}
+@media(hover:none){
+  .gacha-btn:hover,.lid-btn:hover{transform:none;}
+  .back-btn:hover{border-color:var(--dim);color:var(--dim);}
+}
 </style>
 </head>
 <body>
 <canvas id="stars-canvas"></canvas>
 <div class="nebula nb1"></div><div class="nebula nb2"></div><div class="nebula nb3"></div>
 
-<!-- HAMBURGER BUTTON -->
-<button id="hamburger-btn" onclick="togglePanel()" title="확률 보기">
+<button id="hamburger-btn" onclick="togglePanel()" aria-label="확률 보기">
   <span></span><span></span><span></span>
 </button>
-
-<!-- BACKDROP -->
 <div id="panel-backdrop" onclick="closePanel()"></div>
-
-<!-- PROBABILITY PANEL -->
 <div id="prob-panel">
   <div class="prob-panel-header">
     <div class="prob-panel-title">★ 등급 확률표</div>
     <div class="prob-panel-sub">GRADE PROBABILITY</div>
   </div>
   <div class="prob-list">
-
-    <div class="prob-item">
-      <div class="prob-item-top">
-        <span class="prob-item-label c-SSR">★★★ SSR</span>
-        <span class="prob-item-pct c-SSR">5%</span>
-      </div>
-      <div class="prob-bar-track"><div class="prob-bar-fill bar-SSR" data-pct="5"></div></div>
-      <div class="prob-item-desc">오늘은 뽑기가 잘 될지 모릅니다.<br>최고의 행운 등급입니다.</div>
-    </div>
-
-    <div class="prob-item">
-      <div class="prob-item-top">
-        <span class="prob-item-label c-SR">★★ SR</span>
-        <span class="prob-item-pct c-SR">15%</span>
-      </div>
-      <div class="prob-bar-track"><div class="prob-bar-fill bar-SR" data-pct="15"></div></div>
-      <div class="prob-item-desc">오늘은 뽑기가 나쁘지 않습니다.<br>좋은 기운이 흐르는 날입니다.</div>
-    </div>
-
-    <div class="prob-item">
-      <div class="prob-item-top">
-        <span class="prob-item-label c-R">★ R</span>
-        <span class="prob-item-pct c-R">25%</span>
-      </div>
-      <div class="prob-bar-track"><div class="prob-bar-fill bar-R" data-pct="25"></div></div>
-      <div class="prob-item-desc">오늘은 뽑기가 보통입니다.<br>평범하지만 나쁘지 않은 하루.</div>
-    </div>
-
-    <div class="prob-item">
-      <div class="prob-item-top">
-        <span class="prob-item-label c-UC">◆ UC</span>
-        <span class="prob-item-pct c-UC">25%</span>
-      </div>
-      <div class="prob-bar-track"><div class="prob-bar-fill bar-UC" data-pct="25"></div></div>
-      <div class="prob-item-desc">오늘은 뽑기가 나쁠것 같습니다.<br>뚜껑 따기로 재도전 가능!</div>
-    </div>
-
-    <div class="prob-item">
-      <div class="prob-item-top">
-        <span class="prob-item-label c-N">◇ N</span>
-        <span class="prob-item-pct c-N">30%</span>
-      </div>
-      <div class="prob-bar-track"><div class="prob-bar-fill bar-N" data-pct="30"></div></div>
-      <div class="prob-item-desc">오늘은 뽑기가 잘 안될 수 있습니다.<br>뚜껑 따기로 재도전 가능!</div>
-    </div>
-
+    <div class="prob-item"><div class="prob-item-top"><span class="prob-item-label c-SSR">★★★ SSR</span><span class="prob-item-pct c-SSR">5%</span></div><div class="prob-bar-track"><div class="prob-bar-fill bar-SSR" data-pct="5"></div></div><div class="prob-item-desc">오늘은 뽑기가 잘 될지 모릅니다.<br>최고의 행운 등급입니다.</div></div>
+    <div class="prob-item"><div class="prob-item-top"><span class="prob-item-label c-SR">★★ SR</span><span class="prob-item-pct c-SR">15%</span></div><div class="prob-bar-track"><div class="prob-bar-fill bar-SR" data-pct="15"></div></div><div class="prob-item-desc">오늘은 뽑기가 나쁘지 않습니다.<br>좋은 기운이 흐르는 날입니다.</div></div>
+    <div class="prob-item"><div class="prob-item-top"><span class="prob-item-label c-R">★ R</span><span class="prob-item-pct c-R">25%</span></div><div class="prob-bar-track"><div class="prob-bar-fill bar-R" data-pct="25"></div></div><div class="prob-item-desc">오늘은 뽑기가 보통입니다.<br>평범하지만 나쁘지 않은 하루.</div></div>
+    <div class="prob-item"><div class="prob-item-top"><span class="prob-item-label c-UC">◆ UC</span><span class="prob-item-pct c-UC">25%</span></div><div class="prob-bar-track"><div class="prob-bar-fill bar-UC" data-pct="25"></div></div><div class="prob-item-desc">오늘은 뽑기가 나쁠것 같습니다.<br>뚜껑 따기로 재도전 가능!</div></div>
+    <div class="prob-item"><div class="prob-item-top"><span class="prob-item-label c-N">◇ N</span><span class="prob-item-pct c-N">30%</span></div><div class="prob-bar-track"><div class="prob-bar-fill bar-N" data-pct="30"></div></div><div class="prob-item-desc">오늘은 뽑기가 잘 안될 수 있습니다.<br>뚜껑 따기로 재도전 가능!</div></div>
   </div>
-  <div class="prob-panel-note">
-    💡 UC · N 등급은 결과 화면에서<br>
-    「머신 뚜껑 따기」 버튼으로<br>
-    한 번 더 도전할 수 있습니다.<br><br>
-    ※ 본 확률은 매 뽑기마다<br>
-    독립적으로 적용됩니다.
-  </div>
+  <div class="prob-panel-note">💡 UC · N 등급은 결과 화면에서<br>「머신 뚜껑 따기」 버튼으로<br>한 번 더 도전할 수 있습니다.<br><br>※ 본 확률은 매 뽑기마다<br>독립적으로 적용됩니다.</div>
 </div>
 
 <!-- MAIN -->
@@ -366,10 +243,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
             <linearGradient id="lG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3060"/><stop offset="100%" stop-color="#0a1830"/></linearGradient>
           </defs>
           <rect x="60" y="260" width="140" height="16" rx="3" fill="url(#lG)" stroke="#2a4a8e" stroke-width="1.5"/>
-          <rect x="75" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70" stroke-width="1"/>
-          <rect x="165" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70" stroke-width="1"/>
-          <rect x="68" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060" stroke-width="1"/>
-          <rect x="156" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060" stroke-width="1"/>
+          <rect x="75" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70"/>
+          <rect x="165" y="274" width="20" height="30" rx="2" fill="#0d1f50" stroke="#1e3a70"/>
+          <rect x="68" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060"/>
+          <rect x="156" y="300" width="36" height="8" rx="2" fill="#0a1628" stroke="#1a3060"/>
           <rect x="45" y="175" width="170" height="88" rx="6" fill="url(#bG)" stroke="#2a5aaa" stroke-width="2"/>
           <rect x="56" y="185" width="60" height="4" rx="1" fill="#4dd9ff" opacity="0.2"/>
           <rect x="56" y="193" width="40" height="3" rx="1" fill="#4dd9ff" opacity="0.15"/>
@@ -412,20 +289,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
           <rect x="207" y="255" width="8" height="8" fill="#4dd9ff" opacity="0.3"/>
         </svg>
       </div>
-      <p class="shake-hint">🖱 클릭하면 머신을 흔들 수 있어요!</p>
+      <p class="shake-hint">👆 머신을 터치/클릭하면 흔들어요!</p>
       <button class="gacha-btn" id="main-draw-btn" onclick="startGacha()">▶ 운세 뽑기</button>
       <p class="space-hint">[ SPACE ] 키로도 뽑을 수 있습니다</p>
     </div>
-
-    <!-- BOTTOM LOG BAR -->
-    <div class="log-bar" id="log-bar-main">
-      <div class="log-bar-header">
-        <span class="log-bar-title">📋 뽑기 기록</span>
-        <span class="log-bar-date" id="sidebar-date-main"></span>
-      </div>
-      <div class="log-bar-body" id="log-main">
-        <span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>
-      </div>
+    <div class="log-bar">
+      <div class="log-bar-header"><span class="log-bar-title">📋 뽑기 기록</span><span class="log-bar-date" id="sidebar-date-main"></span></div>
+      <div class="log-bar-body" id="log-main"><span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span></div>
     </div>
   </div>
   <p class="disclaimer">재미로만 즐겨 주십시오.</p>
@@ -433,235 +303,92 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 <!-- RESULT -->
 <div class="screen hidden" id="result-screen">
-  <h1 class="page-title" style="font-size:clamp(18px,3.5vw,36px);margin-bottom:6px;">✦ 오늘의 뽑기 운세 ✦</h1>
-  <p class="page-subtitle" style="margin-bottom:20px;">TODAY'S FORTUNE</p>
+  <h1 class="page-title" style="font-size:clamp(15px,4vw,34px);">✦ 오늘의 뽑기 운세 ✦</h1>
+  <p class="page-subtitle" style="margin-bottom:14px;">TODAY'S FORTUNE</p>
   <div class="result-layout">
     <div class="result-main">
       <div class="result-card" id="result-card"></div>
       <div class="result-actions" id="result-actions"></div>
     </div>
-    <!-- BOTTOM LOG BAR -->
-    <div class="log-bar" id="log-bar-result">
-      <div class="log-bar-header">
-        <span class="log-bar-title">📋 뽑기 기록</span>
-        <span class="log-bar-date" id="sidebar-date-result"></span>
-      </div>
-      <div class="log-bar-body" id="log-result">
-        <span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>
-      </div>
+    <div class="log-bar">
+      <div class="log-bar-header"><span class="log-bar-title">📋 뽑기 기록</span><span class="log-bar-date" id="sidebar-date-result"></span></div>
+      <div class="log-bar-body" id="log-result"><span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span></div>
     </div>
   </div>
-  <p class="disclaimer" style="margin-top:16px;">재미로만 즐겨 주십시오.</p>
+  <p class="disclaimer">재미로만 즐겨 주십시오.</p>
 </div>
 
 <script>
-// PANEL
-let panelOpen=false;
-function togglePanel(){panelOpen?closePanel():openPanel();}
-function openPanel(){
-  panelOpen=true;
-  document.getElementById('prob-panel').classList.add('open');
-  document.getElementById('panel-backdrop').classList.add('open');
-  document.getElementById('hamburger-btn').classList.add('open');
-  // animate bars
-  setTimeout(()=>{
-    document.querySelectorAll('.prob-bar-fill').forEach(el=>{
-      el.style.width=el.dataset.pct+'%';
-    });
-  },100);
-}
-function closePanel(){
-  panelOpen=false;
-  document.getElementById('prob-panel').classList.remove('open');
-  document.getElementById('panel-backdrop').classList.remove('open');
-  document.getElementById('hamburger-btn').classList.remove('open');
-  document.querySelectorAll('.prob-bar-fill').forEach(el=>{el.style.width='0%';});
-}
-
 // STARS
 const canvas=document.getElementById('stars-canvas'),ctx=canvas.getContext('2d');let stars=[];
-function initStars(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;stars=[];for(let i=0;i<200;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,alpha:Math.random(),speed:Math.random()*.3+.05,tw:Math.random()*Math.PI*2});}
+function initStars(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;stars=[];for(let i=0;i<180;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.4+.2,alpha:Math.random(),speed:Math.random()*.3+.05,tw:Math.random()*Math.PI*2});}
 function animateStars(){ctx.clearRect(0,0,canvas.width,canvas.height);const t=Date.now()*.001;stars.forEach(s=>{const a=.4+.6*Math.abs(Math.sin(t*s.speed+s.tw));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(200,230,255,${a*s.alpha})`;ctx.fill();});requestAnimationFrame(animateStars);}
 window.addEventListener('resize',initStars);initStars();animateStars();
 
+// PANEL
+let panelOpen=false;
+function togglePanel(){panelOpen?closePanel():openPanel();}
+function openPanel(){panelOpen=true;document.getElementById('prob-panel').classList.add('open');document.getElementById('panel-backdrop').classList.add('open');document.getElementById('hamburger-btn').classList.add('open');setTimeout(()=>{document.querySelectorAll('.prob-bar-fill').forEach(el=>el.style.width=el.dataset.pct+'%');},120);}
+function closePanel(){panelOpen=false;document.getElementById('prob-panel').classList.remove('open');document.getElementById('panel-backdrop').classList.remove('open');document.getElementById('hamburger-btn').classList.remove('open');document.querySelectorAll('.prob-bar-fill').forEach(el=>el.style.width='0%');}
+
 // DATA
 const grades=[
-  {id:'SSR',label:'★★★ SSR ★★★',emoji:'🌟',color:'grade-SSR',ccolor:'c-SSR',borderColor:'#ffd700',
-   verdict:'오늘은 뽑기가 잘 될지 모릅니다.',
-   titles:['천상의 기운이 함께합니다','오늘은 최고의 날입니다','우주가 당신을 축복합니다'],
-   texts:['모든 일이 순조롭게 풀리는 하루입니다. 오랫동안 기다려온 소식이 들려올 것입니다. 자신을 믿고 앞으로 나아가세요.','강력한 행운의 기운이 당신을 감싸고 있습니다. 포기하지 않았던 일에서 빛나는 결실을 맺게 됩니다.'],
-   quotes:['오늘 하루, 가챠를 조금만 돌려보는 건 어떨까요?','지금 이 순간이 이미 최고의 운입니다.','욕심보다 감사함이 더 큰 행운을 부릅니다.'],
-   chance:5,canRetry:false},
-  {id:'SR',label:'★★ SR ★★',emoji:'💫',color:'grade-SR',ccolor:'c-SR',borderColor:'#ff6eb4',
-   verdict:'오늘은 뽑기가 나쁘지 않습니다.',
-   titles:['행운의 별이 빛납니다','좋은 기회가 찾아옵니다','분홍빛 행운이 가득합니다'],
-   texts:['인간관계에서 좋은 인연이 찾아올 것입니다. 평소보다 조금 더 용기를 내어보세요.','기분 좋은 소식과 함께 하루가 시작됩니다. 소중한 사람과 따뜻한 시간을 보내세요.'],
-   quotes:['오늘 가챠는 이쯤에서 멈춰도 좋을 것 같아요.','좋은 운은 나누면 두 배가 됩니다.','오늘의 행운, 한 번 더 뽑는 것보다 소중히 간직해 보세요.'],
-   chance:15,canRetry:false},
-  {id:'R',label:'★ R ★',emoji:'🔮',color:'grade-R',ccolor:'c-R',borderColor:'#b36eff',
-   verdict:'오늘은 뽑기가 보통입니다.',
-   titles:['신비로운 기운이 흐릅니다','변화의 바람이 붑니다','내면의 힘을 깨우세요'],
-   texts:['새로운 관점으로 사물을 바라보면 뜻밖의 해답을 찾게 됩니다. 직감을 믿어보세요.','작은 변화가 큰 전환점이 됩니다. 지금까지의 노력이 서서히 빛을 발하기 시작합니다.'],
-   quotes:['가챠는 오늘 두세 번이면 충분하지 않을까요?','변화를 두려워하지 마세요. 흐름에 몸을 맡겨 보세요.','아직 펼쳐지지 않은 가능성이 당신 앞에 있습니다.'],
-   chance:25,canRetry:false},
-  {id:'UC',label:'◆ UC ◆',emoji:'🌿',color:'grade-UC',ccolor:'c-UC',borderColor:'#39ff8f',
-   verdict:'오늘은 뽑기가 나쁠것 같습니다.',
-   titles:['차분한 기운이 감돕니다','성실함이 빛을 발합니다','꾸준함이 답입니다'],
-   texts:['오늘은 무리하기보다 자신을 돌보는 하루를 만들어보세요. 작은 친절이 돌아옵니다.','평범한 일상 속에 숨은 행복을 발견하게 됩니다. 감사한 마음을 가져보세요.'],
-   quotes:['가챠를 너무 많이 돌리면 손목이 아플 수 있어요.','꾸준히 쌓은 것들이 결국 빛납니다. 오늘도 한 걸음씩.','서두르지 않아도 됩니다. 천천히, 그러나 확실하게.'],
-   chance:25,canRetry:true},
-  {id:'N',label:'◇ N ◇',emoji:'🌊',color:'grade-N',ccolor:'c-N',borderColor:'#4dd9ff',
-   verdict:'오늘은 뽑기가 잘 안될 수 있습니다.',
-   titles:['평온한 하루가 기다립니다','잔잔한 물결 같은 하루','여유로운 기운이 함께합니다'],
-   texts:['급하게 서두르지 않아도 됩니다. 오늘은 천천히, 하나씩 처리하는 것이 최선입니다.','때로는 멈추는 것도 지혜입니다. 오늘 하루 충분한 휴식을 취하세요.'],
-   quotes:['오늘은 가챠보다 산책 한 번이 더 좋을지도 몰라요.','잠시 멈추고 숨을 고르는 것, 그것도 용기입니다.','평온한 하루를 보내는 것이 최고의 운세입니다.'],
-   chance:30,canRetry:true}
+  {id:'SSR',label:'★★★ SSR ★★★',emoji:'🌟',color:'grade-SSR',ccolor:'c-SSR',borderColor:'#ffd700',verdict:'오늘은 뽑기가 잘 될지 모릅니다.',titles:['천상의 기운이 함께합니다','오늘은 최고의 날입니다','우주가 당신을 축복합니다'],texts:['모든 일이 순조롭게 풀리는 하루입니다. 오랫동안 기다려온 소식이 들려올 것입니다. 자신을 믿고 앞으로 나아가세요.','강력한 행운의 기운이 당신을 감싸고 있습니다. 포기하지 않았던 일에서 빛나는 결실을 맺게 됩니다.'],quotes:['오늘 하루, 가챠를 조금만 돌려보는 건 어떨까요?','지금 이 순간이 이미 최고의 운입니다.','욕심보다 감사함이 더 큰 행운을 부릅니다.'],chance:5,canRetry:false},
+  {id:'SR',label:'★★ SR ★★',emoji:'💫',color:'grade-SR',ccolor:'c-SR',borderColor:'#ff6eb4',verdict:'오늘은 뽑기가 나쁘지 않습니다.',titles:['행운의 별이 빛납니다','좋은 기회가 찾아옵니다','분홍빛 행운이 가득합니다'],texts:['인간관계에서 좋은 인연이 찾아올 것입니다. 평소보다 조금 더 용기를 내어보세요.','기분 좋은 소식과 함께 하루가 시작됩니다. 소중한 사람과 따뜻한 시간을 보내세요.'],quotes:['오늘 가챠는 이쯤에서 멈춰도 좋을 것 같아요.','좋은 운은 나누면 두 배가 됩니다.','오늘의 행운, 한 번 더 뽑는 것보다 소중히 간직해 보세요.'],chance:15,canRetry:false},
+  {id:'R',label:'★ R ★',emoji:'🔮',color:'grade-R',ccolor:'c-R',borderColor:'#b36eff',verdict:'오늘은 뽑기가 보통입니다.',titles:['신비로운 기운이 흐릅니다','변화의 바람이 붑니다','내면의 힘을 깨우세요'],texts:['새로운 관점으로 사물을 바라보면 뜻밖의 해답을 찾게 됩니다. 직감을 믿어보세요.','작은 변화가 큰 전환점이 됩니다. 지금까지의 노력이 서서히 빛을 발하기 시작합니다.'],quotes:['가챠는 오늘 두세 번이면 충분하지 않을까요?','변화를 두려워하지 마세요. 흐름에 몸을 맡겨 보세요.','아직 펼쳐지지 않은 가능성이 당신 앞에 있습니다.'],chance:25,canRetry:false},
+  {id:'UC',label:'◆ UC ◆',emoji:'🌿',color:'grade-UC',ccolor:'c-UC',borderColor:'#39ff8f',verdict:'오늘은 뽑기가 나쁠것 같습니다.',titles:['차분한 기운이 감돕니다','성실함이 빛을 발합니다','꾸준함이 답입니다'],texts:['오늘은 무리하기보다 자신을 돌보는 하루를 만들어보세요. 작은 친절이 돌아옵니다.','평범한 일상 속에 숨은 행복을 발견하게 됩니다. 감사한 마음을 가져보세요.'],quotes:['가챠를 너무 많이 돌리면 손목이 아플 수 있어요.','꾸준히 쌓은 것들이 결국 빛납니다. 오늘도 한 걸음씩.','서두르지 않아도 됩니다. 천천히, 그러나 확실하게.'],chance:25,canRetry:true},
+  {id:'N',label:'◇ N ◇',emoji:'🌊',color:'grade-N',ccolor:'c-N',borderColor:'#4dd9ff',verdict:'오늘은 뽑기가 잘 안될 수 있습니다.',titles:['평온한 하루가 기다립니다','잔잔한 물결 같은 하루','여유로운 기운이 함께합니다'],texts:['급하게 서두르지 않아도 됩니다. 오늘은 천천히, 하나씩 처리하는 것이 최선입니다.','때로는 멈추는 것도 지혜입니다. 오늘 하루 충분한 휴식을 취하세요.'],quotes:['오늘은 가챠보다 산책 한 번이 더 좋을지도 몰라요.','잠시 멈추고 숨을 고르는 것, 그것도 용기입니다.','평온한 하루를 보내는 것이 최고의 운세입니다.'],chance:30,canRetry:true}
 ];
-
 function pickGrade(){const r=Math.random()*100;let c=0;for(const g of grades){c+=g.chance;if(r<c)return g;}return grades[grades.length-1];}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 
 // LOG
 const drawLog=[];
-function fmtDate(){const n=new Date();const days=['일','월','화','수','목','금','토'];return`${n.getFullYear()}년 ${n.getMonth()+1}월 ${n.getDate()}일 (${days[n.getDay()]}요일)`;}
+function fmtDate(){const n=new Date(),d=['일','월','화','수','목','금','토'];return`${n.getFullYear()}.${n.getMonth()+1}.${n.getDate()} (${d[n.getDay()]})`;}
 function fmtTime(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+function renderLog(id){const el=document.getElementById(id);if(!el)return;if(!drawLog.length){el.innerHTML='<span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>';return;}el.innerHTML=drawLog.slice().reverse().map(e=>`<div class="log-chip ${e.ccolor}" style="border-left-color:${e.borderColor}"><span class="log-chip-grade">${e.label}</span><span class="log-chip-text">${e.verdict}</span><span class="log-chip-time">${e.time}</span></div>`).join('');el.scrollLeft=0;}
+function updateAll(){const d=fmtDate();['sidebar-date-main','sidebar-date-result'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='📅 '+d;});renderLog('log-main');renderLog('log-result');}
+updateAll();
 
-function renderLog(logId){
-  const el=document.getElementById(logId);
-  if(!el)return;
-  if(drawLog.length===0){el.innerHTML='<span class="log-empty-bar">아직 뽑기 기록이 없습니다.</span>';return;}
-  el.innerHTML=drawLog.slice().reverse().map(e=>`
-    <div class="log-chip ${e.ccolor}" style="border-left-color:${e.borderColor}">
-      <span class="log-chip-grade">${e.label}</span>
-      <span class="log-chip-text">${e.verdict}</span>
-      <span class="log-chip-time">${e.time}</span>
-    </div>`).join('');
-  // scroll to newest (left)
-  el.scrollLeft=0;
-}
-
-function updateSidebars(){
-  const d=fmtDate();
-  ['sidebar-date-main','sidebar-date-result'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.innerHTML=`📅 ${d}`;
-  });
-  renderLog('log-main');
-  renderLog('log-result');
-}
-updateSidebars();
-
-// SHAKE MACHINE (click only — not navigate)
+// SHAKE (manual)
 const machineEl=document.getElementById('gacha-machine');
-machineEl.addEventListener('click',()=>{
-  if(machineEl.classList.contains('shaking'))return;
-  machineEl.classList.add('shaking');
-  const flash=document.createElement('div');flash.className='shake-flash';document.body.appendChild(flash);
-  setTimeout(()=>flash.remove(),400);
-  machineEl.addEventListener('animationend',()=>machineEl.classList.remove('shaking'),{once:true});
-});
+machineEl.addEventListener('click',()=>{if(machineEl.classList.contains('shaking'))return;machineEl.classList.add('shaking');const f=document.createElement('div');f.className='shake-flash';document.body.appendChild(f);setTimeout(()=>f.remove(),400);machineEl.addEventListener('animationend',()=>machineEl.classList.remove('shaking'),{once:true});});
 
 // PARTICLES
-function burst(x,y,color){
-  const c=document.createElement('div');c.className='particle-burst';c.style.left=x+'px';c.style.top=y+'px';document.body.appendChild(c);
-  for(let i=0;i<18;i++){const p=document.createElement('div');const a=(i/18)*360,d=60+Math.random()*80,s=3+Math.random()*5;p.style.cssText=`position:absolute;width:${s}px;height:${s}px;background:${color};border-radius:50%;transform:translate(-50%,-50%);animation:pf .8s ease-out forwards;--dx:${Math.cos(a*Math.PI/180)*d}px;--dy:${Math.sin(a*Math.PI/180)*d}px;`;c.appendChild(p);}
-  if(!document.getElementById('pkf')){const s=document.createElement('style');s.id='pkf';s.textContent='@keyframes pf{0%{transform:translate(-50%,-50%) translate(0,0);opacity:1;}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy));opacity:0;}}';document.head.appendChild(s);}
-  setTimeout(()=>c.remove(),900);
-}
+function burst(x,y,color){const c=document.createElement('div');c.className='particle-burst';c.style.left=x+'px';c.style.top=y+'px';document.body.appendChild(c);for(let i=0;i<16;i++){const p=document.createElement('div'),a=(i/16)*360,d=50+Math.random()*70,s=3+Math.random()*4;p.style.cssText=`position:absolute;width:${s}px;height:${s}px;background:${color};border-radius:50%;transform:translate(-50%,-50%);animation:pf .8s ease-out forwards;--dx:${Math.cos(a*Math.PI/180)*d}px;--dy:${Math.sin(a*Math.PI/180)*d}px;`;c.appendChild(p);}if(!document.getElementById('pkf')){const s=document.createElement('style');s.id='pkf';s.textContent='@keyframes pf{0%{transform:translate(-50%,-50%) translate(0,0);opacity:1;}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy));opacity:0;}}';document.head.appendChild(s);}setTimeout(()=>c.remove(),900);}
 
 // GACHA
 let busy=false;
 function startGacha(){
-  if(busy)return;
-  busy=true;
-  const btn=document.getElementById('main-draw-btn');
-  const handle=document.getElementById('handle-group');
-  const machine=document.getElementById('gacha-machine');
+  if(busy)return;busy=true;
+  const btn=document.getElementById('main-draw-btn'),handle=document.getElementById('handle-group'),machine=document.getElementById('gacha-machine');
   btn.disabled=true;
-
-  // 머신 2.5초 흔들기
   machine.classList.add('shaking');
   handle.classList.add('handle-spinning');
   handle.addEventListener('animationend',()=>handle.classList.remove('handle-spinning'),{once:true});
-
-  // 흔드는 도중 플래시 효과 2번
-  [400, 1400].forEach(t=>{
-    setTimeout(()=>{
-      const flash=document.createElement('div');flash.className='shake-flash';document.body.appendChild(flash);
-      setTimeout(()=>flash.remove(),400);
-    },t);
-  });
-
-  // 2.5초 후 결과
-  setTimeout(()=>{
-    machine.classList.remove('shaking');
-    machine.addEventListener('animationend',()=>{},{ once:true });
-    showResult();
-    btn.disabled=false;
-    busy=false;
-  },2500);
+  [400,1400].forEach(t=>setTimeout(()=>{const f=document.createElement('div');f.className='shake-flash';document.body.appendChild(f);setTimeout(()=>f.remove(),400);},t));
+  setTimeout(()=>{machine.classList.remove('shaking');showResult();btn.disabled=false;busy=false;},2500);
 }
 
 function showResult(){
-  const grade=pickGrade();
-  const title=pick(grade.titles);
-  const text=pick(grade.texts);
-  const quote=pick(grade.quotes);
-
+  const grade=pickGrade(),title=pick(grade.titles),text=pick(grade.texts),quote=pick(grade.quotes);
   drawLog.push({label:grade.label,verdict:grade.verdict,ccolor:grade.ccolor,borderColor:grade.borderColor,time:fmtTime()});
-  updateSidebars();
-
-  const card=document.getElementById('result-card');
-  card.className='result-card '+grade.color;
-  card.innerHTML=`
-    <div class="grade-badge ${grade.color}">${grade.label}</div>
-    <span class="capsule-emoji">${grade.emoji}</span>
-    <div class="fortune-verdict ${grade.ccolor}">${grade.verdict}</div>
-    <div class="fortune-title">${title}</div>
-    <div class="fortune-text">${text}</div>
-    <div class="todays-quote">
-      <span class="todays-quote-label">✦ 오늘의 한마디</span>
-      <span class="todays-quote-text">${quote}</span>
-    </div>`;
-
-  const actions=document.getElementById('result-actions');
-  actions.innerHTML='';
-
-  if(grade.canRetry){
-    const lid=document.createElement('button');
-    lid.className='lid-btn';
-    lid.innerHTML='🔧 머신 뚜껑 따기 (다시 뽑기)';
-    lid.onclick=()=>{
-      lid.classList.add('cracking');lid.disabled=true;lid.textContent='뚜껑 따는 중...⚙️';
-      lid.addEventListener('animationend',()=>{lid.classList.remove('cracking');goBack(true);},{once:true});
-    };
-    actions.appendChild(lid);
-  }
-
-  const back=document.createElement('button');
-  back.className='back-btn';
-  back.textContent='← 메인으로 돌아가기';
-  back.onclick=()=>goBack(false);
-  actions.appendChild(back);
-
+  updateAll();
+  document.getElementById('result-card').className='result-card '+grade.color;
+  document.getElementById('result-card').innerHTML=`<div class="grade-badge ${grade.color}">${grade.label}</div><span class="capsule-emoji">${grade.emoji}</span><div class="fortune-verdict ${grade.ccolor}">${grade.verdict}</div><div class="fortune-title">${title}</div><div class="fortune-text">${text}</div><div class="todays-quote"><span class="todays-quote-label">✦ 오늘의 한마디</span><span class="todays-quote-text">${quote}</span></div>`;
+  const actions=document.getElementById('result-actions');actions.innerHTML='';
+  if(grade.canRetry){const lid=document.createElement('button');lid.className='lid-btn';lid.innerHTML='🔧 머신 뚜껑 따기 (다시 뽑기)';lid.onclick=()=>{lid.classList.add('cracking');lid.disabled=true;lid.textContent='뚜껑 따는 중...⚙️';lid.addEventListener('animationend',()=>{lid.classList.remove('cracking');goBack(true);},{once:true});};actions.appendChild(lid);}
+  const back=document.createElement('button');back.className='back-btn';back.textContent='← 메인으로 돌아가기';back.onclick=()=>goBack(false);actions.appendChild(back);
   document.getElementById('main-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.remove('hidden');
-  burst(window.innerWidth/2,window.innerHeight/2,grade.borderColor);
+  window.scrollTo({top:0,behavior:'smooth'});
+  burst(window.innerWidth/2,window.innerHeight*0.38,grade.borderColor);
 }
 
-function goBack(autoRedraw){
-  document.getElementById('result-screen').classList.add('hidden');
-  document.getElementById('main-screen').classList.remove('hidden');
-  if(autoRedraw)setTimeout(startGacha,250);
-}
+function goBack(autoRedraw){document.getElementById('result-screen').classList.add('hidden');document.getElementById('main-screen').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});if(autoRedraw)setTimeout(startGacha,250);}
 
 // SPACEBAR
-document.addEventListener('keydown',e=>{
-  if(e.code==='Space'&&!e.repeat){
-    e.preventDefault();
-    if(!document.getElementById('main-screen').classList.contains('hidden'))startGacha();
-  }
-});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.repeat){e.preventDefault();if(!document.getElementById('main-screen').classList.contains('hidden'))startGacha();}});
 </script>
 </body>
 </html>
