@@ -118,8 +118,20 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .grade-N{color:#4dd9ff;border:1px solid #4dd9ff;box-shadow:0 0 14px rgba(77,217,255,.4);}
 .grade-UC{color:#39ff8f;border:1px solid #39ff8f;box-shadow:0 0 14px rgba(57,255,143,.4);text-shadow:0 0 10px #39ff8f;}
 
-.capsule-emoji{font-size:clamp(42px,10vw,60px);display:block;margin:4px 0 14px;animation:bounceIn .6s .2s cubic-bezier(.34,1.56,.64,1) both;}
+.grade-icon{display:flex;justify-content:center;align-items:center;margin:4px auto 16px;animation:bounceIn .6s .2s cubic-bezier(.34,1.56,.64,1) both;}
+.grade-icon svg{width:clamp(80px,18vw,110px);height:clamp(80px,18vw,110px);}
 @keyframes bounceIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+/* per-grade icon glow pulses */
+@keyframes glowSSR{0%,100%{filter:drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 14px #ffd70088);}50%{filter:drop-shadow(0 0 14px #ffd700) drop-shadow(0 0 30px #ffd700aa);}}
+@keyframes glowSR {0%,100%{filter:drop-shadow(0 0 6px #ff6eb4) drop-shadow(0 0 14px #ff6eb488);}50%{filter:drop-shadow(0 0 14px #ff6eb4) drop-shadow(0 0 30px #ff6eb4aa);}}
+@keyframes glowR  {0%,100%{filter:drop-shadow(0 0 6px #b36eff) drop-shadow(0 0 14px #b36eff88);}50%{filter:drop-shadow(0 0 14px #b36eff) drop-shadow(0 0 30px #b36effaa);}}
+@keyframes glowUC {0%,100%{filter:drop-shadow(0 0 5px #39ff8f) drop-shadow(0 0 12px #39ff8f66);}50%{filter:drop-shadow(0 0 10px #39ff8f) drop-shadow(0 0 22px #39ff8f99);}}
+@keyframes glowN  {0%,100%{filter:drop-shadow(0 0 5px #4dd9ff) drop-shadow(0 0 12px #4dd9ff66);}50%{filter:drop-shadow(0 0 10px #4dd9ff) drop-shadow(0 0 22px #4dd9ff99);}}
+.icon-SSR svg{animation:glowSSR 2s ease-in-out infinite;}
+.icon-SR  svg{animation:glowSR  2s ease-in-out infinite;}
+.icon-R   svg{animation:glowR   2s ease-in-out infinite;}
+.icon-UC  svg{animation:glowUC  2.5s ease-in-out infinite;}
+.icon-N   svg{animation:glowN   2.5s ease-in-out infinite;}
 .fortune-verdict{font-size:clamp(12px,3.2vw,15px);line-height:1.9;margin-bottom:10px;animation:fadeUp .5s .3s both;}
 .fortune-title{font-size:clamp(9px,2.3vw,11px);margin-bottom:10px;line-height:1.8;animation:fadeUp .5s .5s both;}
 .fortune-text{font-size:clamp(8px,2vw,9px);color:var(--dim);line-height:2.2;animation:fadeUp .5s .7s both;}
@@ -357,7 +369,145 @@ machineEl.addEventListener('click',()=>{if(machineEl.classList.contains('shaking
 // PARTICLES
 function burst(x,y,color){const c=document.createElement('div');c.className='particle-burst';c.style.left=x+'px';c.style.top=y+'px';document.body.appendChild(c);for(let i=0;i<16;i++){const p=document.createElement('div'),a=(i/16)*360,d=50+Math.random()*70,s=3+Math.random()*4;p.style.cssText=`position:absolute;width:${s}px;height:${s}px;background:${color};border-radius:50%;transform:translate(-50%,-50%);animation:pf .8s ease-out forwards;--dx:${Math.cos(a*Math.PI/180)*d}px;--dy:${Math.sin(a*Math.PI/180)*d}px;`;c.appendChild(p);}if(!document.getElementById('pkf')){const s=document.createElement('style');s.id='pkf';s.textContent='@keyframes pf{0%{transform:translate(-50%,-50%) translate(0,0);opacity:1;}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy));opacity:0;}}';document.head.appendChild(s);}setTimeout(()=>c.remove(),900);}
 
-// GACHA
+// DOT-ART SVG ICONS per grade
+function iconSSR(){
+  // 3 gold pixel stars in a triangle arrangement
+  return `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- top center star (large) -->
+    <g transform="translate(55,22) scale(1)">
+      <polygon points="0,-16 4,-6 14,-6 6,1 10,11 0,5 -10,11 -6,1 -14,-6 -4,-6"
+        fill="#ffd700" stroke="#ffaa00" stroke-width="1.5"/>
+      <polygon points="0,-10 2.5,-4 9,-4 4,0 6,7 0,3 -6,7 -4,0 -9,-4 -2.5,-4"
+        fill="#ffe566"/>
+      <!-- pixel shine dots -->
+      <rect x="-2" y="-9" width="3" height="3" fill="#fff8aa" opacity="0.9"/>
+    </g>
+    <!-- bottom-left star (medium) -->
+    <g transform="translate(26,72) scale(0.88)">
+      <polygon points="0,-16 4,-6 14,-6 6,1 10,11 0,5 -10,11 -6,1 -14,-6 -4,-6"
+        fill="#ffd700" stroke="#ffaa00" stroke-width="1.5"/>
+      <polygon points="0,-10 2.5,-4 9,-4 4,0 6,7 0,3 -6,7 -4,0 -9,-4 -2.5,-4"
+        fill="#ffe566"/>
+      <rect x="-2" y="-9" width="3" height="3" fill="#fff8aa" opacity="0.9"/>
+    </g>
+    <!-- bottom-right star (medium) -->
+    <g transform="translate(84,72) scale(0.88)">
+      <polygon points="0,-16 4,-6 14,-6 6,1 10,11 0,5 -10,11 -6,1 -14,-6 -4,-6"
+        fill="#ffd700" stroke="#ffaa00" stroke-width="1.5"/>
+      <polygon points="0,-10 2.5,-4 9,-4 4,0 6,7 0,3 -6,7 -4,0 -9,-4 -2.5,-4"
+        fill="#ffe566"/>
+      <rect x="-2" y="-9" width="3" height="3" fill="#fff8aa" opacity="0.9"/>
+    </g>
+    <!-- pixel sparkle lines -->
+    <rect x="53" y="6" width="4" height="4" fill="#ffd700" opacity="0.7"/>
+    <rect x="53" y="98" width="4" height="4" fill="#ffd700" opacity="0.5"/>
+    <rect x="6"  y="50" width="4" height="4" fill="#ffd700" opacity="0.5"/>
+    <rect x="100" y="50" width="4" height="4" fill="#ffd700" opacity="0.5"/>
+  </svg>`;
+}
+
+function iconSR(){
+  // 2 pink stars side by side
+  return `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- left star -->
+    <g transform="translate(30,55) scale(0.92)">
+      <polygon points="0,-18 5,-7 16,-7 7,1 11,13 0,6 -11,13 -7,1 -16,-7 -5,-7"
+        fill="#ff6eb4" stroke="#cc3080" stroke-width="1.5"/>
+      <polygon points="0,-11 3,-5 10,-5 5,0 7,8 0,4 -7,8 -5,0 -10,-5 -3,-5"
+        fill="#ffaacc"/>
+      <rect x="-2" y="-10" width="3" height="3" fill="#ffe0f0" opacity="0.9"/>
+    </g>
+    <!-- right star -->
+    <g transform="translate(80,55) scale(0.92)">
+      <polygon points="0,-18 5,-7 16,-7 7,1 11,13 0,6 -11,13 -7,1 -16,-7 -5,-7"
+        fill="#ff6eb4" stroke="#cc3080" stroke-width="1.5"/>
+      <polygon points="0,-11 3,-5 10,-5 5,0 7,8 0,4 -7,8 -5,0 -10,-5 -3,-5"
+        fill="#ffaacc"/>
+      <rect x="-2" y="-10" width="3" height="3" fill="#ffe0f0" opacity="0.9"/>
+    </g>
+    <!-- pixel dots -->
+    <rect x="52" y="10" width="6" height="6" fill="#ff6eb4" opacity="0.5"/>
+    <rect x="52" y="94" width="6" height="6" fill="#ff6eb4" opacity="0.4"/>
+  </svg>`;
+}
+
+function iconR(){
+  // 1 purple star centered, larger
+  return `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <g transform="translate(55,55)">
+      <polygon points="0,-26 7,-10 22,-10 10,2 15,18 0,9 -15,18 -10,2 -22,-10 -7,-10"
+        fill="#b36eff" stroke="#7020cc" stroke-width="2"/>
+      <polygon points="0,-16 4,-7 14,-7 6,1 10,12 0,6 -10,12 -6,1 -14,-7 -4,-7"
+        fill="#d4aaff"/>
+      <!-- pixel shine -->
+      <rect x="-3" y="-14" width="4" height="4" fill="#eedaff" opacity="0.9"/>
+      <rect x="4"  y="-8"  width="3" height="3" fill="#eedaff" opacity="0.6"/>
+    </g>
+    <!-- corner sparkles -->
+    <rect x="12" y="12" width="5" height="5" fill="#b36eff" opacity="0.4"/>
+    <rect x="93" y="12" width="5" height="5" fill="#b36eff" opacity="0.4"/>
+    <rect x="12" y="93" width="5" height="5" fill="#b36eff" opacity="0.3"/>
+    <rect x="93" y="93" width="5" height="5" fill="#b36eff" opacity="0.3"/>
+  </svg>`;
+}
+
+function iconUC(){
+  // pixel warning sign (triangle with !)
+  return `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- outer triangle -->
+    <polygon points="55,8 102,90 8,90" fill="#39ff8f" stroke="#1aaa60" stroke-width="3"/>
+    <!-- inner triangle cutout (dark) -->
+    <polygon points="55,20 94,84 16,84" fill="#0d3020"/>
+    <!-- inner triangle highlight -->
+    <polygon points="55,22 92,82 18,82" fill="#0a2818"/>
+    <!-- exclamation mark body (pixel blocks) -->
+    <rect x="50" y="36" width="10" height="28" rx="1" fill="#39ff8f"/>
+    <!-- exclamation dot -->
+    <rect x="50" y="70" width="10" height="9"  rx="1" fill="#39ff8f"/>
+    <!-- shine on triangle edge -->
+    <line x1="55" y1="10" x2="26" y2="63" stroke="#aaffcc" stroke-width="2.5" opacity="0.25" stroke-linecap="square"/>
+    <!-- pixel corner bolts -->
+    <rect x="6"  y="88" width="6" height="6" fill="#39ff8f" opacity="0.5"/>
+    <rect x="98" y="88" width="6" height="6" fill="#39ff8f" opacity="0.5"/>
+    <rect x="52" y="4"  width="6" height="6" fill="#39ff8f" opacity="0.6"/>
+  </svg>`;
+}
+
+function iconN(){
+  // pixel skull
+  return `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <!-- skull cranium -->
+    <rect x="22" y="16" width="66" height="54" rx="6" fill="#4dd9ff" stroke="#1a88aa" stroke-width="2"/>
+    <!-- cranium highlight -->
+    <rect x="28" y="20" width="54" height="14" rx="3" fill="#a0eeff" opacity="0.2"/>
+    <!-- left eye socket -->
+    <rect x="30" y="34" width="18" height="20" rx="2" fill="#050e22"/>
+    <rect x="32" y="36" width="14" height="16" rx="1" fill="#030a18"/>
+    <!-- right eye socket -->
+    <rect x="62" y="34" width="18" height="20" rx="2" fill="#050e22"/>
+    <rect x="64" y="36" width="14" height="16" rx="1" fill="#030a18"/>
+    <!-- nose -->
+    <rect x="50" y="52" width="10" height="8" rx="1" fill="#050e22"/>
+    <!-- jaw base -->
+    <rect x="26" y="68" width="58" height="18" rx="3" fill="#3abbee" stroke="#1a88aa" stroke-width="1.5"/>
+    <!-- teeth (pixel blocks with gaps) -->
+    <rect x="30" y="68" width="10" height="14" rx="1" fill="#e8f4ff"/>
+    <rect x="44" y="68" width="10" height="14" rx="1" fill="#e8f4ff"/>
+    <rect x="58" y="68" width="10" height="14" rx="1" fill="#e8f4ff"/>
+    <rect x="72" y="68" width="10" height="14" rx="1" fill="#e8f4ff"/>
+    <!-- eye shine dots -->
+    <rect x="32" y="36" width="4" height="4" fill="#4dd9ff" opacity="0.5"/>
+    <rect x="64" y="36" width="4" height="4" fill="#4dd9ff" opacity="0.5"/>
+    <!-- pixel cross bones below -->
+    <rect x="10" y="92" width="38" height="6"  rx="2" fill="#4dd9ff" opacity="0.55" transform="rotate(-30,29,95)"/>
+    <rect x="62" y="92" width="38" height="6"  rx="2" fill="#4dd9ff" opacity="0.55" transform="rotate(30,81,95)"/>
+    <!-- bone knobs -->
+    <rect x="8"  y="88" width="8" height="8" rx="2" fill="#4dd9ff" opacity="0.6"/>
+    <rect x="94" y="88" width="8" height="8" rx="2" fill="#4dd9ff" opacity="0.6"/>
+  </svg>`;
+}
+
+const gradeIcons={SSR:iconSSR,SR:iconSR,R:iconR,UC:iconUC,N:iconN};
 let busy=false;
 function startGacha(){
   if(busy)return;busy=true;
@@ -375,7 +525,8 @@ function showResult(){
   drawLog.push({label:grade.label,verdict:grade.verdict,ccolor:grade.ccolor,borderColor:grade.borderColor,time:fmtTime()});
   updateAll();
   document.getElementById('result-card').className='result-card '+grade.color;
-  document.getElementById('result-card').innerHTML=`<div class="grade-badge ${grade.color}">${grade.label}</div><span class="capsule-emoji">${grade.emoji}</span><div class="fortune-verdict ${grade.ccolor}">${grade.verdict}</div><div class="fortune-title">${title}</div><div class="fortune-text">${text}</div><div class="todays-quote"><span class="todays-quote-label">✦ 오늘의 한마디</span><span class="todays-quote-text">${quote}</span></div>`;
+  const iconHtml = gradeIcons[grade.id] ? `<div class="grade-icon icon-${grade.id}">${gradeIcons[grade.id]()}</div>` : '';
+  document.getElementById('result-card').innerHTML=`<div class="grade-badge ${grade.color}">${grade.label}</div>${iconHtml}<div class="fortune-verdict ${grade.ccolor}">${grade.verdict}</div><div class="fortune-title">${title}</div><div class="fortune-text">${text}</div><div class="todays-quote"><span class="todays-quote-label">✦ 오늘의 한마디</span><span class="todays-quote-text">${quote}</span></div>`;
   const actions=document.getElementById('result-actions');actions.innerHTML='';
   if(grade.canRetry){const lid=document.createElement('button');lid.className='lid-btn';lid.innerHTML='🔧 머신 뚜껑 따기 (다시 뽑기)';lid.onclick=()=>{lid.classList.add('cracking');lid.disabled=true;lid.textContent='뚜껑 따는 중...⚙️';lid.addEventListener('animationend',()=>{lid.classList.remove('cracking');goBack(true);},{once:true});};actions.appendChild(lid);}
   const back=document.createElement('button');back.className='back-btn';back.textContent='← 메인으로 돌아가기';back.onclick=()=>goBack(false);actions.appendChild(back);
